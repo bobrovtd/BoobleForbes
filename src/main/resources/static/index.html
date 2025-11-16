@@ -13,19 +13,48 @@
 <div id="root"></div>
 
 <script type="text/babel">
-   const App = () => {
+  const App = () => {
+    const [currentPage, setCurrentPage] = React.useState('myForms');
+
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-            <h1 className="text-3xl font-bold text-gray-800">
-                FormBuilder
-            </h1>
+        <div className="min-h-screen bg-gray-100">
+            <header className="bg-white shadow">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-16">
+                        <div className="flex items-center">
+                            <h1 className="text-xl font-bold text-gray-900">FormBuilder</h1>
+                        </div>
+                        <nav className="flex space-x-4">
+                            <button
+                                onClick={() => setCurrentPage('myForms')}
+                                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                                    currentPage === 'myForms'
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : 'text-gray-700 hover:bg-gray-100'
+                                }`}
+                            >
+                                Мои формы
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                {/* пока просто заглушка */}
+                <div className="p-6 max-w-6xl mx-auto">
+                    <h2 className="text-2xl font-bold">Мои формы</h2>
+                </div>
+            </main>
         </div>
     );
 };
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
 </script>
 </body>
 </html>
+
 
