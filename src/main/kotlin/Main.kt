@@ -13,18 +13,33 @@ import kotlinx.serialization.json.Json
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
+// ---------- Модели ----------
+
+@Serializable
+data class Question(
+    val id: Long? = null,
+    val type: String,          // "text", "textarea", "radio", "checkbox", "dropdown"
+    val question: String,
+    val required: Boolean = false,
+    val options: List<String> = emptyList()
+)
+
 @Serializable
 data class Form(
     val id: Long? = null,
     val title: String,
-    val description: String = ""
+    val description: String = "",
+    val questions: List<Question> = emptyList()
 )
 
 @Serializable
 data class FormUpsertRequest(
     val title: String,
-    val description: String = ""
+    val description: String = "",
+    val questions: List<Question> = emptyList()
 )
+
+// ---------- Репозиторий ----------
 
 object FormRepository {
     private val forms = ConcurrentHashMap<Long, Form>()
@@ -36,10 +51,14 @@ object FormRepository {
 
     fun create(req: FormUpsertRequest): Form {
         val id = formIdSeq.getAndIncrement()
+        val questionsWithIds = req.questions.mapIndexed { index, q ->
+            q.copy(id = index.toLong() + 1)
+        }
         val form = Form(
             id = id,
             title = req.title,
-            description = req.description
+            description = req.description,
+            questions = questionsWithIds
         )
         forms[id] = form
         return form
@@ -47,9 +66,13 @@ object FormRepository {
 
     fun update(id: Long, req: FormUpsertRequest): Form? {
         val existing = forms[id] ?: return null
+        val questionsWithIds = req.questions.mapIndexed { index, q ->
+            q.copy(id = q.id ?: (index.toLong() + 1))
+        }
         val updated = existing.copy(
             title = req.title,
-            description = req.description
+            description = req.description,
+            questions = questionsWithIds
         )
         forms[id] = updated
         return updated
@@ -60,6 +83,8 @@ object FormRepository {
     }
 }
 
+// ---------- Точка входа ----------
+
 fun main() {
     embeddedServer(
         Netty,
@@ -69,6 +94,8 @@ fun main() {
         module()
     }.start(wait = true)
 }
+
+// ---------- Конфигурация приложения ----------
 
 fun Application.module() {
     install(ContentNegotiation) {
@@ -82,7 +109,7 @@ fun Application.module() {
     }
 
     install(CORS) {
-        anyHost() // для учебного проекта ок
+        anyHost()
         allowHeader(HttpHeaders.ContentType)
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
