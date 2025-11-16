@@ -10,6 +10,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
@@ -25,11 +26,19 @@ data class Question(
 )
 
 @Serializable
+data class FormResponse(
+    val id: Long? = null,
+    val timestamp: String? = null,
+    val answers: Map<String, String>  // ключ: индекс вопроса (как строка) или id
+)
+
+@Serializable
 data class Form(
     val id: Long? = null,
     val title: String,
     val description: String = "",
-    val questions: List<Question> = emptyList()
+    val questions: List<Question> = emptyList(),
+    val responses: List<FormResponse> = emptyList()
 )
 
 @Serializable
@@ -39,11 +48,17 @@ data class FormUpsertRequest(
     val questions: List<Question> = emptyList()
 )
 
+@Serializable
+data class SubmitResponseRequest(
+    val answers: Map<String, String>
+)
+
 // ---------- Репозиторий ----------
 
 object FormRepository {
     private val forms = ConcurrentHashMap<Long, Form>()
     private val formIdSeq = AtomicLong(1)
+    private val responseIdSeq = AtomicLong(1)
 
     fun getAll(): List<Form> = forms.values.sortedBy { it.id }
 
@@ -58,7 +73,8 @@ object FormRepository {
             id = id,
             title = req.title,
             description = req.description,
-            questions = questionsWithIds
+            questions = questionsWithIds,
+            responses = emptyList()
         )
         forms[id] = form
         return form
@@ -80,6 +96,26 @@ object FormRepository {
 
     fun delete(id: Long): Boolean {
         return forms.remove(id) != null
+    }
+
+    fun addResponse(formId: Long, req: SubmitResponseRequest): FormResponse? {
+        val form = forms[formId] ?: return null
+        val responseId = responseIdSeq.getAndIncrement()
+        val response = FormResponse(
+            id = responseId,
+            timestamp = Instant.now().toString(),
+            answers = req.answers
+        )
+        val updatedForm = form.copy(
+            responses = form.responses + response
+        )
+        forms[formId] = updatedForm
+        return response
+    }
+
+    fun getResponses(formId: Long): List<FormResponse>? {
+        val form = forms[formId] ?: return null
+        return form.responses
     }
 }
 
@@ -109,7 +145,7 @@ fun Application.module() {
     }
 
     install(CORS) {
-        anyHost()
+        anyHost() // для учебного проекта ок
         allowHeader(HttpHeaders.ContentType)
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
@@ -177,6 +213,37 @@ fun Application.module() {
                     call.respond(HttpStatusCode.NotFound, "Form not found")
                 } else {
                     call.respond(HttpStatusCode.NoContent)
+                }
+            }
+
+            get("{id}/responses") {
+                val id = call.parameters["id"]?.toLongOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid id")
+                    return@get
+                }
+
+                val responses = FormRepository.getResponses(id)
+                if (responses == null) {
+                    call.respond(HttpStatusCode.NotFound, "Form not found")
+                } else {
+                    call.respond(responses)
+                }
+            }
+
+            post("{id}/responses") {
+                val id = call.parameters["id"]?.toLongOrNull()
+                if (id == null) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid id")
+                    return@post
+                }
+
+                val req = call.receive<SubmitResponseRequest>()
+                val saved = FormRepository.addResponse(id, req)
+                if (saved == null) {
+                    call.respond(HttpStatusCode.NotFound, "Form not found")
+                } else {
+                    call.respond(HttpStatusCode.Created, saved)
                 }
             }
         }
