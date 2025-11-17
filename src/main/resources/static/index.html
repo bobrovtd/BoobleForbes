@@ -90,12 +90,21 @@ const MyForms = ({ setCurrentPage, forms, setForms }) => {
                             Вопросов: {(form.questions || []).length}
                         </p>
 
-                        <button
-                            onClick={() => setCurrentPage({ name: "editor", formId: form.id })}
-                            className="w-full bg-blue-100 text-blue-700 rounded py-2 text-sm hover:bg-blue-200"
-                        >
-                            Редактировать
-                        </button>
+                        <div className="space-y-2">
+                            <button
+                                onClick={() => setCurrentPage({ name: "editor", formId: form.id })}
+                                className="w-full bg-blue-100 text-blue-700 rounded py-2 text-sm hover:bg-blue-200"
+                            >
+                                Редактировать
+                            </button>
+
+                            <button
+                                onClick={() => setCurrentPage({ name: "preview", formId: form.id })}
+                                className="w-full bg-gray-100 text-gray-800 rounded py-2 text-sm hover:bg-gray-200"
+                            >
+                                Предпросмотр
+                            </button>
+                        </div>
 
                     </div>
                 ))}
@@ -110,7 +119,7 @@ const MyForms = ({ setCurrentPage, forms, setForms }) => {
 
 
 /*-----------------------------------------
-    РЕДАКТОР ФОРМЫ (удаление вопросов и options)
+    РЕДАКТОР ФОРМЫ
 ------------------------------------------*/
 const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
     const [title, setTitle] = useState("");
@@ -370,6 +379,123 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
 
 
 /*-----------------------------------------
+    ПРЕДПРОСМОТР ФОРМЫ
+------------------------------------------*/
+const PreviewForm = ({ setCurrentPage, forms, currentFormId }) => {
+    const form = forms.find(f => f.id === currentFormId);
+
+    if (!form) {
+        return (
+            <div className="p-6 max-w-2xl mx-auto text-center">
+                <h1 className="text-2xl font-bold mb-4">Форма не найдена</h1>
+                <button
+                    onClick={() => setCurrentPage("myForms")}
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                    Вернуться к формам
+                </button>
+            </div>
+        );
+    }
+
+    const supportsOptions = (type) =>
+        type === "radio" || type === "checkbox" || type === "dropdown";
+
+    return (
+        <div className="p-6 max-w-2xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Предпросмотр формы</h1>
+                <button
+                    onClick={() => setCurrentPage("myForms")}
+                    className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+                >
+                    Назад
+                </button>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow">
+                <h2 className="text-2xl font-bold mb-2">{form.title}</h2>
+                {form.description && (
+                    <p className="text-gray-600 mb-6">{form.description}</p>
+                )}
+
+                {(!form.questions || form.questions.length === 0) && (
+                    <p className="text-gray-500">В этой форме пока нет вопросов</p>
+                )}
+
+                <div className="space-y-6">
+                    {form.questions && form.questions.map((q, index) => (
+                        <div key={q.id} className="border-b pb-4">
+                            <p className="font-medium mb-2">
+                                {index + 1}. {q.question}
+                                {q.required && <span className="text-red-500 ml-1">*</span>}
+                            </p>
+
+                            {q.type === "text" && (
+                                <input
+                                    type="text"
+                                    className="w-full border px-4 py-2 rounded bg-gray-50"
+                                    placeholder="Короткий ответ"
+                                    disabled
+                                />
+                            )}
+
+                            {q.type === "textarea" && (
+                                <textarea
+                                    className="w-full border px-4 py-2 rounded bg-gray-50"
+                                    rows="3"
+                                    placeholder="Длинный ответ"
+                                    disabled
+                                />
+                            )}
+
+                            {supportsOptions(q.type) && q.options && (
+                                <>
+                                    {q.type === "radio" && (
+                                        <div className="space-y-2">
+                                            {q.options.map((opt, i) => (
+                                                <label key={i} className="flex items-center">
+                                                    <input type="radio" disabled className="mr-2" />
+                                                    <span>{opt}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {q.type === "checkbox" && (
+                                        <div className="space-y-2">
+                                            {q.options.map((opt, i) => (
+                                                <label key={i} className="flex items-center">
+                                                    <input type="checkbox" disabled className="mr-2" />
+                                                    <span>{opt}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {q.type === "dropdown" && (
+                                        <select
+                                            className="w-full border px-4 py-2 rounded bg-gray-50"
+                                            disabled
+                                        >
+                                            <option>Выберите вариант</option>
+                                            {q.options.map((opt, i) => (
+                                                <option key={i}>{opt}</option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
+/*-----------------------------------------
     APP
 ------------------------------------------*/
 const App = () => {
@@ -384,15 +510,27 @@ const App = () => {
     }, []);
 
     const renderPage = () => {
-        if (typeof currentPage === "object" && currentPage.name === "editor") {
-            return (
-                <FormEditor
-                    setCurrentPage={setCurrentPage}
-                    forms={forms}
-                    setForms={setForms}
-                    currentFormId={currentPage.formId}
-                />
-            );
+        if (typeof currentPage === "object") {
+            if (currentPage.name === "editor") {
+                return (
+                    <FormEditor
+                        setCurrentPage={setCurrentPage}
+                        forms={forms}
+                        setForms={setForms}
+                        currentFormId={currentPage.formId}
+                    />
+                );
+            }
+
+            if (currentPage.name === "preview") {
+                return (
+                    <PreviewForm
+                        setCurrentPage={setCurrentPage}
+                        forms={forms}
+                        currentFormId={currentPage.formId}
+                    />
+                );
+            }
         }
 
         return <MyForms setCurrentPage={setCurrentPage} forms={forms} setForms={setForms} />;
