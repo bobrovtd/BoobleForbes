@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FormBuilder</title>
 
+    <!-- React -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel для JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -15,87 +20,137 @@
 <div id="root"></div>
 
 <script type="text/babel">
+    // -------------------------------
+    // Компонент MyForms
+    // -------------------------------
+    const MyForms = ({ forms, setForms }) => {
+        const [newFormTitle, setNewFormTitle] = React.useState('');
 
-// -------------------------------
-// Компонент MyForms
-// -------------------------------
-const MyForms = ({ forms }) => {
-    return (
-        <div className="p-6 max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Мои формы</h1>
+        const handleCreateForm = async () => {
+            if (newFormTitle.trim() === '') return;
 
-            {forms.length === 0 ? (
-                <p className="text-gray-500">Форм пока нет</p>
-            ) : (
-                <ul className="list-disc ml-6">
-                    {forms.map(form => (
-                        <li key={form.id}>{form.title}</li>
-                    ))}
-                </ul>
-            )}
-        </div>
-    );
-};
-
-// -------------------------------
-// Компонент App
-// -------------------------------
-const App = () => {
-    const [currentPage, setCurrentPage] = React.useState('myForms');
-    const [forms, setForms] = React.useState([]);
-
-    React.useEffect(() => {
-        const fetchForms = async () => {
             try {
-                const res = await fetch('/api/forms');
+                const res = await fetch('/api/forms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: newFormTitle.trim(),
+                        description: '',
+                        questions: []
+                    })
+                });
+
                 if (!res.ok) {
-                    throw new Error('Не удалось загрузить формы');
+                    throw new Error('Не удалось создать форму');
                 }
-                const data = await res.json();
-                setForms(data);
+
+                const created = await res.json();
+                setForms(prev => [...prev, created]);
+                setNewFormTitle('');
             } catch (e) {
                 console.error(e);
+                alert('Ошибка при создании формы');
             }
         };
 
-        fetchForms();
-    }, []);
+        return (
+            <div className="p-6 max-w-6xl mx-auto">
+                <h1 className="text-3xl font-bold text-gray-800 mb-6">Мои формы</h1>
 
-    return (
-        <div className="min-h-screen bg-gray-100">
-            <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <h1 className="text-xl font-bold text-gray-900">FormBuilder</h1>
-                        </div>
-                        <nav className="flex space-x-4">
-                            <button
-                                onClick={() => setCurrentPage('myForms')}
-                                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                                currentPage === 'myForms'
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                            >
-                                Мои формы
-                            </button>
-                        </nav>
+                {/* Поле для создания формы */}
+                <div className="mb-8 bg-white p-4 rounded-lg shadow">
+                    <div className="flex">
+                        <input
+                            type="text"
+                            value={newFormTitle}
+                            onChange={(e) => setNewFormTitle(e.target.value)}
+                            placeholder="Название новой формы"
+                            className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                        <button
+                            onClick={handleCreateForm}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-r-lg"
+                        >
+                            Создать
+                        </button>
                     </div>
                 </div>
-            </header>
 
-            <main>
-                {currentPage === 'myForms' && <MyForms forms={forms} />}
-            </main>
-        </div>
-    );
-};
+                {/* Список форм */}
+                {forms.length === 0 ? (
+                    <p className="text-gray-500">Форм пока нет</p>
+                ) : (
+                    <ul className="list-disc ml-6">
+                        {forms.map(form => (
+                            <li key={form.id} className="mb-2">
+                                {form.title}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+        );
+    };
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+    // -------------------------------
+    // Компонент App
+    // -------------------------------
+    const App = () => {
+        const [currentPage, setCurrentPage] = React.useState('myForms');
+        const [forms, setForms] = React.useState([]);
 
+        React.useEffect(() => {
+            const fetchForms = async () => {
+                try {
+                    const res = await fetch('/api/forms');
+                    if (!res.ok) {
+                        throw new Error('Не удалось загрузить формы');
+                    }
+                    const data = await res.json();
+                    setForms(data);
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+
+            fetchForms();
+        }, []);
+
+        return (
+            <div className="min-h-screen bg-gray-100">
+                <header className="bg-white shadow">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between h-16">
+                            <div className="flex items-center">
+                                <h1 className="text-xl font-bold text-gray-900">FormBuilder</h1>
+                            </div>
+                            <nav className="flex space-x-4">
+                                <button
+                                    onClick={() => setCurrentPage('myForms')}
+                                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                                        currentPage === 'myForms'
+                                            ? 'bg-blue-100 text-blue-700'
+                                            : 'text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    Мои формы
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                </header>
+
+                <main>
+                    {currentPage === 'myForms' && (
+                        <MyForms forms={forms} setForms={setForms} />
+                    )}
+                </main>
+            </div>
+        );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
 </script>
-
 </body>
 </html>
