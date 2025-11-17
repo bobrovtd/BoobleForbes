@@ -19,6 +19,12 @@ dependencies {
     implementation("io.ktor:ktor-server-cors-jvm:$ktorVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+
+    testImplementation(kotlin("test"))
+    testImplementation("io.ktor:ktor-server-tests-jvm:2.3.7")
+    testImplementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    testImplementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+
 }
 
 application {
