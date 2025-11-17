@@ -21,7 +21,7 @@
 const { useState, useEffect } = React;
 
 /*-----------------------------------------
-    СТРАНИЦА: МОИ ФОРМЫ
+    МОИ ФОРМЫ
 ------------------------------------------*/
 const MyForms = ({ setCurrentPage, forms, setForms }) => {
     const [newFormTitle, setNewFormTitle] = useState("");
@@ -106,7 +106,7 @@ const MyForms = ({ setCurrentPage, forms, setForms }) => {
 
 
 /*-----------------------------------------
-    СТРАНИЦА: РЕДАКТОР ФОРМЫ (ДОБАВЛЕНИЕ ВОПРОСОВ)
+    РЕДАКТОР ФОРМЫ
 ------------------------------------------*/
 const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
     const [title, setTitle] = useState("");
@@ -116,7 +116,7 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
     const [newQuestionText, setNewQuestionText] = useState("");
     const [newQuestionType, setNewQuestionType] = useState("text");
 
-    /* Загрузить данные формы */
+    /* Загрузка данных */
     useEffect(() => {
         if (!currentFormId) return;
 
@@ -128,33 +128,84 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
         }
     }, [currentFormId, forms]);
 
-    /* Добавление вопроса */
+    /* Добавить вопрос */
     const handleAddQuestion = () => {
         if (!newQuestionText.trim()) return;
 
-        const newQ = {
+        const q = {
             id: Date.now(),
             question: newQuestionText.trim(),
             type: newQuestionType
         };
 
-        setQuestions(prev => [...prev, newQ]);
+        setQuestions(prev => [...prev, q]);
         setNewQuestionText("");
         setNewQuestionType("text");
+    };
+
+    /* Сохранение формы */
+    const handleSaveForm = async () => {
+        const payload = {
+            title,
+            description,
+            questions
+        };
+
+        try {
+            let res;
+
+            if (currentFormId) {
+                // обновить существующую форму
+                res = await fetch(`/api/forms/${currentFormId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                // создать новую форму
+                res = await fetch("/api/forms", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            const updated = await res.json();
+
+            if (currentFormId) {
+                setForms(prev => prev.map(f => f.id === currentFormId ? updated : f));
+            } else {
+                setForms(prev => [...prev, updated]);
+            }
+
+            setCurrentPage("myForms");
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка при сохранении формы");
+        }
     };
 
     return (
         <div className="p-6 max-w-3xl mx-auto">
 
-            {/* Заголовок */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">Редактор формы</h1>
-                <button
-                    onClick={() => setCurrentPage("myForms")}
-                    className="bg-gray-200 px-4 py-2 rounded-lg"
-                >
-                    Назад
-                </button>
+
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => setCurrentPage("myForms")}
+                        className="bg-gray-200 px-4 py-2 rounded"
+                    >
+                        Назад
+                    </button>
+
+                    <button
+                        onClick={handleSaveForm}
+                        className="bg-green-600 text-white px-4 py-2 rounded"
+                    >
+                        Сохранить
+                    </button>
+                </div>
             </div>
 
             {/* Блок формы */}
@@ -176,18 +227,17 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
                 />
             </div>
 
-            {/* Добавление вопроса */}
+            {/* Добавить вопрос */}
             <div className="bg-white p-6 rounded-lg shadow mb-6">
                 <h2 className="text-xl font-semibold mb-4">Добавить вопрос</h2>
 
-                <label className="block mb-1">Текст вопроса</label>
                 <input
                     className="w-full border px-4 py-2 rounded mb-4"
+                    placeholder="Введите текст вопроса"
                     value={newQuestionText}
                     onChange={(e) => setNewQuestionText(e.target.value)}
                 />
 
-                <label className="block mb-1">Тип вопроса</label>
                 <select
                     className="w-full border px-4 py-2 rounded mb-4"
                     value={newQuestionType}
@@ -196,7 +246,7 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
                     <option value="text">Короткий ответ</option>
                     <option value="textarea">Длинный ответ</option>
                     <option value="radio">Один вариант</option>
-                    <option value="checkbox">Множественный выбор</option>
+                    <option value="checkbox">Несколько вариантов</option>
                     <option value="dropdown">Выпадающий список</option>
                 </select>
 
