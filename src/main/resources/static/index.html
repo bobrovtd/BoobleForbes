@@ -52,9 +52,9 @@ const MyForms = ({ setCurrentPage, forms, setForms }) => {
 
                 <button
                     onClick={() => setCurrentPage({ name: "editor", formId: null })}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center"
                 >
-                    + Создать форму
+                    <i className="fas fa-plus mr-2" /> Создать форму
                 </button>
             </div>
 
@@ -62,14 +62,14 @@ const MyForms = ({ setCurrentPage, forms, setForms }) => {
             <div className="bg-white p-4 rounded-lg shadow mb-6">
                 <div className="flex">
                     <input
-                        className="flex-1 border px-3 py-2 rounded-l-lg"
+                        className="flex-1 border px-3 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Название новой формы"
                         value={newFormTitle}
                         onChange={(e) => setNewFormTitle(e.target.value)}
                     />
                     <button
                         onClick={handleCreate}
-                        className="bg-green-600 text-white px-4 py-2 rounded-r-lg"
+                        className="bg-green-600 text-white px-4 py-2 rounded-r-lg hover:bg-green-700"
                     >
                         Создать
                     </button>
@@ -79,16 +79,20 @@ const MyForms = ({ setCurrentPage, forms, setForms }) => {
             {/* Список */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {forms.map(form => (
-                    <div key={form.id} className="bg-white rounded-lg shadow p-5">
+                    <div key={form.id} className="bg-white rounded-lg shadow p-5 hover:shadow-md transition-shadow">
 
-                        <h3 className="text-lg font-semibold">{form.title}</h3>
+                        <h3 className="text-lg font-semibold mb-1">{form.title}</h3>
                         <p className="text-gray-500 text-sm mb-4">
                             {form.description || "Нет описания"}
                         </p>
 
+                        <p className="text-xs text-gray-500 mb-3">
+                            Вопросов: {(form.questions || []).length}
+                        </p>
+
                         <button
                             onClick={() => setCurrentPage({ name: "editor", formId: form.id })}
-                            className="w-full bg-blue-100 text-blue-700 rounded py-2"
+                            className="w-full bg-blue-100 text-blue-700 rounded py-2 text-sm hover:bg-blue-200"
                         >
                             Редактировать
                         </button>
@@ -106,7 +110,7 @@ const MyForms = ({ setCurrentPage, forms, setForms }) => {
 
 
 /*-----------------------------------------
-    РЕДАКТОР ФОРМЫ (с options)
+    РЕДАКТОР ФОРМЫ (удаление вопросов и options)
 ------------------------------------------*/
 const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
     const [title, setTitle] = useState("");
@@ -150,6 +154,11 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
         setNewQuestionText("");
         setNewQuestionType("text");
         setNewQuestionOptions([""]);
+    };
+
+    /* Удалить вопрос */
+    const handleDeleteQuestion = (id) => {
+        setQuestions(prev => prev.filter(q => q.id !== id));
     };
 
     /* Сохранение формы */
@@ -203,8 +212,12 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
         setNewQuestionOptions(prev => [...prev, ""]);
     };
 
+    const handleRemoveOptionField = (index) => {
+        setNewQuestionOptions(prev => prev.filter((_, i) => i !== index));
+    };
+
     return (
-        <div className="p-6 max-w-3xl mx-auto">
+        <div className="p-6 max-w-4xl mx-auto">
 
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold">Редактор формы</h1>
@@ -212,16 +225,16 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
                 <div className="flex space-x-2">
                     <button
                         onClick={() => setCurrentPage("myForms")}
-                        className="bg-gray-200 px-4 py-2 rounded"
+                        className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
                     >
                         Назад
                     </button>
 
                     <button
                         onClick={handleSaveForm}
-                        className="bg-green-600 text-white px-4 py-2 rounded"
+                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     >
-                        Сохранить
+                        <i className="fas fa-save mr-2" /> Сохранить
                     </button>
                 </div>
             </div>
@@ -231,17 +244,19 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
 
                 <label className="block font-medium mb-1">Название формы</label>
                 <input
-                    className="w-full border px-4 py-2 rounded mb-4"
+                    className="w-full border px-4 py-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Введите название формы"
                 />
 
                 <label className="block font-medium mb-1">Описание формы</label>
                 <textarea
-                    className="w-full border px-4 py-2 rounded mb-4"
+                    className="w-full border px-4 py-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="3"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Введите описание (необязательно)"
                 />
             </div>
 
@@ -251,7 +266,7 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
 
                 <label className="block mb-1">Текст вопроса</label>
                 <input
-                    className="w-full border px-4 py-2 rounded mb-4"
+                    className="w-full border px-4 py-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Введите текст вопроса"
                     value={newQuestionText}
                     onChange={(e) => setNewQuestionText(e.target.value)}
@@ -275,13 +290,23 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
                     <div className="mb-4">
                         <label className="block mb-2">Варианты ответа</label>
                         {newQuestionOptions.map((opt, idx) => (
-                            <input
-                                key={idx}
-                                className="w-full border px-4 py-2 rounded mb-2"
-                                placeholder={`Вариант ${idx + 1}`}
-                                value={opt}
-                                onChange={(e) => handleOptionChange(idx, e.target.value)}
-                            />
+                            <div key={idx} className="flex mb-2">
+                                <input
+                                    className="flex-1 border px-4 py-2 rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder={`Вариант ${idx + 1}`}
+                                    value={opt}
+                                    onChange={(e) => handleOptionChange(idx, e.target.value)}
+                                />
+                                {newQuestionOptions.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveOptionField(idx)}
+                                        className="bg-red-100 text-red-600 px-3 rounded-r hover:bg-red-200"
+                                    >
+                                        <i className="fas fa-times" />
+                                    </button>
+                                )}
+                            </div>
                         ))}
                         <button
                             type="button"
@@ -295,7 +320,7 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
 
                 <button
                     onClick={handleAddQuestion}
-                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 >
                     Добавить вопрос
                 </button>
@@ -310,11 +335,24 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
                 )}
 
                 {questions.map((q, idx) => (
-                    <div key={q.id} className="border-b py-3">
-                        <p className="font-medium">{idx + 1}. {q.question}</p>
-                        <p className="text-gray-600 text-sm mb-1">
-                            Тип: {q.type}
-                        </p>
+                    <div key={q.id} className="border border-gray-200 rounded-lg p-4 mb-3">
+                        <div className="flex justify-between items-start mb-2">
+                            <div>
+                                <p className="font-medium">
+                                    {idx + 1}. {q.question}
+                                </p>
+                                <p className="text-gray-600 text-sm">
+                                    Тип: {q.type}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => handleDeleteQuestion(q.id)}
+                                className="text-red-500 hover:text-red-700 text-sm flex items-center"
+                            >
+                                <i className="fas fa-trash mr-1" /> Удалить
+                            </button>
+                        </div>
+
                         {supportsOptions(q.type) && q.options && q.options.length > 0 && (
                             <ul className="list-disc ml-6 text-sm text-gray-700">
                                 {q.options.map((opt, i) => (
@@ -363,8 +401,9 @@ const App = () => {
     return (
         <div className="min-h-screen bg-gray-100">
             <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 py-4">
-                    <h1 className="text-xl font-bold">BoobleForbes</h1>
+                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center">
+                    <i className="fas fa-file-alt text-blue-600 text-2xl mr-3" />
+                    <h1 className="text-xl font-bold">FormBuilder</h1>
                 </div>
             </header>
 
