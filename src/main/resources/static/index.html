@@ -19,17 +19,66 @@
 // -------------------------------
 // Компонент MyForms
 // -------------------------------
-const MyForms = ({ forms }) => {
+const MyForms = ({ forms, setForms }) => {
+    const [newFormTitle, setNewFormTitle] = React.useState('');
+
+    const handleCreateForm = async () => {
+        if (newFormTitle.trim() === '') return;
+
+        try {
+            const res = await fetch('/api/forms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: newFormTitle.trim(),
+                    description: '',
+                    questions: []
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error('Не удалось создать форму');
+            }
+
+            const created = await res.json();
+            setForms(prev => [...prev, created]);
+            setNewFormTitle('');
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка при создании формы');
+        }
+    };
+
     return (
         <div className="p-6 max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Мои формы</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">Мои формы</h1>
 
+            {/* Поле для создания формы */}
+            <div className="mb-8 bg-white p-4 rounded-lg shadow">
+                <div className="flex">
+                    <input
+                        type="text"
+                        value={newFormTitle}
+                        onChange={(e) => setNewFormTitle(e.target.value)}
+                        placeholder="Название новой формы"
+                        className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                    <button
+                        onClick={handleCreateForm}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-r-lg"
+                    >
+                        Создать
+                    </button>
+                </div>
+            </div>
+
+            {/* Список форм */}
             {forms.length === 0 ? (
                 <p className="text-gray-500">Форм пока нет</p>
             ) : (
                 <ul className="list-disc ml-6">
                     {forms.map(form => (
-                        <li key={form.id}>{form.title}</li>
+                        <li key={form.id} className="mb-2">{form.title}</li>
                     ))}
                 </ul>
             )}
@@ -86,7 +135,9 @@ const App = () => {
             </header>
 
             <main>
-                {currentPage === 'myForms' && <MyForms forms={forms} />}
+                {currentPage === 'myForms' && (
+                    <MyForms forms={forms} setForms={setForms} />
+                )}
             </main>
         </div>
     );
