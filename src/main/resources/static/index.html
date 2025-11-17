@@ -106,7 +106,7 @@ const MyForms = ({ setCurrentPage, forms, setForms }) => {
 
 
 /*-----------------------------------------
-    РЕДАКТОР ФОРМЫ
+    РЕДАКТОР ФОРМЫ (с options)
 ------------------------------------------*/
 const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
     const [title, setTitle] = useState("");
@@ -115,6 +115,7 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
 
     const [newQuestionText, setNewQuestionText] = useState("");
     const [newQuestionType, setNewQuestionType] = useState("text");
+    const [newQuestionOptions, setNewQuestionOptions] = useState([""]);
 
     /* Загрузка данных */
     useEffect(() => {
@@ -128,19 +129,27 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
         }
     }, [currentFormId, forms]);
 
+    const supportsOptions = (type) =>
+        type === "radio" || type === "checkbox" || type === "dropdown";
+
     /* Добавить вопрос */
     const handleAddQuestion = () => {
         if (!newQuestionText.trim()) return;
 
-        const q = {
+        const base = {
             id: Date.now(),
             question: newQuestionText.trim(),
             type: newQuestionType
         };
 
-        setQuestions(prev => [...prev, q]);
+        const newQ = supportsOptions(newQuestionType)
+            ? { ...base, options: newQuestionOptions.filter(o => o.trim() !== "") }
+            : { ...base, options: [] };
+
+        setQuestions(prev => [...prev, newQ]);
         setNewQuestionText("");
         setNewQuestionType("text");
+        setNewQuestionOptions([""]);
     };
 
     /* Сохранение формы */
@@ -155,14 +164,12 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
             let res;
 
             if (currentFormId) {
-                // обновить существующую форму
                 res = await fetch(`/api/forms/${currentFormId}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
             } else {
-                // создать новую форму
                 res = await fetch("/api/forms", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -183,6 +190,17 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
             console.error(e);
             alert("Ошибка при сохранении формы");
         }
+    };
+
+    /* Работа с options для нового вопроса */
+    const handleOptionChange = (index, value) => {
+        const copy = [...newQuestionOptions];
+        copy[index] = value;
+        setNewQuestionOptions(copy);
+    };
+
+    const handleAddOptionField = () => {
+        setNewQuestionOptions(prev => [...prev, ""]);
     };
 
     return (
@@ -231,6 +249,7 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
             <div className="bg-white p-6 rounded-lg shadow mb-6">
                 <h2 className="text-xl font-semibold mb-4">Добавить вопрос</h2>
 
+                <label className="block mb-1">Текст вопроса</label>
                 <input
                     className="w-full border px-4 py-2 rounded mb-4"
                     placeholder="Введите текст вопроса"
@@ -238,6 +257,7 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
                     onChange={(e) => setNewQuestionText(e.target.value)}
                 />
 
+                <label className="block mb-1">Тип вопроса</label>
                 <select
                     className="w-full border px-4 py-2 rounded mb-4"
                     value={newQuestionType}
@@ -249,6 +269,29 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
                     <option value="checkbox">Несколько вариантов</option>
                     <option value="dropdown">Выпадающий список</option>
                 </select>
+
+                {/* Варианты ответа для radio/checkbox/dropdown */}
+                {supportsOptions(newQuestionType) && (
+                    <div className="mb-4">
+                        <label className="block mb-2">Варианты ответа</label>
+                        {newQuestionOptions.map((opt, idx) => (
+                            <input
+                                key={idx}
+                                className="w-full border px-4 py-2 rounded mb-2"
+                                placeholder={`Вариант ${idx + 1}`}
+                                value={opt}
+                                onChange={(e) => handleOptionChange(idx, e.target.value)}
+                            />
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleAddOptionField}
+                            className="text-blue-600 text-sm mt-1"
+                        >
+                            + Добавить ещё вариант
+                        </button>
+                    </div>
+                )}
 
                 <button
                     onClick={handleAddQuestion}
@@ -269,9 +312,16 @@ const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
                 {questions.map((q, idx) => (
                     <div key={q.id} className="border-b py-3">
                         <p className="font-medium">{idx + 1}. {q.question}</p>
-                        <p className="text-gray-600 text-sm">
+                        <p className="text-gray-600 text-sm mb-1">
                             Тип: {q.type}
                         </p>
+                        {supportsOptions(q.type) && q.options && q.options.length > 0 && (
+                            <ul className="list-disc ml-6 text-sm text-gray-700">
+                                {q.options.map((opt, i) => (
+                                    <li key={i}>{opt}</li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 ))}
             </div>
