@@ -8,6 +8,7 @@ import io.ktor.server.response.*
 import io.ktor.server.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.http.content.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.Instant
@@ -41,6 +42,7 @@ data class Form(
     val responses: List<FormResponse> = emptyList()
 )
 
+// DTO для создания/обновления формы
 @Serializable
 data class FormUpsertRequest(
     val title: String,
@@ -48,12 +50,11 @@ data class FormUpsertRequest(
     val questions: List<Question> = emptyList()
 )
 
+// DTO для отправки ответа
 @Serializable
 data class SubmitResponseRequest(
     val answers: Map<String, String>
 )
-
-// ---------- Репозиторий ----------
 
 object FormRepository {
     private val forms = ConcurrentHashMap<Long, Form>()
@@ -117,6 +118,49 @@ object FormRepository {
         val form = forms[formId] ?: return null
         return form.responses
     }
+
+    fun seedDemo() {
+        if (forms.isNotEmpty()) return
+
+        val demoForm = create(
+            FormUpsertRequest(
+                title = "Опрос по качеству сервиса",
+                description = "Помогите нам улучшить качество обслуживания",
+                questions = listOf(
+                    Question(
+                        id = 1,
+                        type = "text",
+                        question = "Как вас зовут?",
+                        required = true
+                    ),
+                    Question(
+                        id = 2,
+                        type = "radio",
+                        question = "Как вы оцениваете наш сервис?",
+                        required = true,
+                        options = listOf("Отлично", "Хорошо", "Удовлетворительно", "Плохо")
+                    ),
+                    Question(
+                        id = 3,
+                        type = "textarea",
+                        question = "Какие у вас предложения по улучшению?",
+                        required = false
+                    )
+                )
+            )
+        )
+
+        addResponse(
+            demoForm.id!!,
+            SubmitResponseRequest(
+                answers = mapOf(
+                    "0" to "Иван Петров",
+                    "1" to "Отлично",
+                    "2" to "Все отлично, спасибо!"
+                )
+            )
+        )
+    }
 }
 
 // ---------- Точка входа ----------
@@ -153,11 +197,13 @@ fun Application.module() {
         allowMethod(HttpMethod.Delete)
     }
 
-    routing {
-        get("/") {
-            call.respondText("BoobleForbes backend is running", ContentType.Text.Plain)
-        }
+    FormRepository.seedDemo()
 
+    routing {
+        // --- статика: index.html ---
+        staticResources("/", "static", "index.html")
+
+        // --- REST API для форм ---
         route("/api/forms") {
 
             get {
