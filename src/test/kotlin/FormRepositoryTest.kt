@@ -47,8 +47,10 @@ class FormRepositoryTest {
             )
         )
 
-        assertEquals("New", updated!!.title)
+        assertNotNull(updated)
+        assertEquals("New", updated.title)
         assertEquals("X", updated.description)
+        assertEquals(2, updated.questions.size)
         assertEquals(10L, updated.questions[0].id)
         assertEquals(2L, updated.questions[1].id)
     }
@@ -58,23 +60,34 @@ class FormRepositoryTest {
         val f = FormRepository.create(
             FormUpsertRequest("Del", questions = emptyList())
         )
-        assertTrue(FormRepository.delete(f.id!!))
-        assertNull(FormRepository.get(f.id))
+
+        val id = requireNotNull(f.id) { "Form id must not be null" }
+
+        assertTrue(FormRepository.delete(id))
+        assertNull(FormRepository.get(id))
     }
 
     @Test
     fun `addResponse should work`() {
         val f = FormRepository.create(
-            FormUpsertRequest("Form", questions = listOf(Question(type = "text", question = "Q1")))
+            FormUpsertRequest(
+                "Form",
+                questions = listOf(Question(type = "text", question = "Q1"))
+            )
         )
 
+        val id = requireNotNull(f.id) { "Form id must not be null" }
+
         val resp = FormRepository.addResponse(
-            f.id!!,
+            id,
             SubmitResponseRequest(mapOf("0" to "Hello"))
         )
 
         assertNotNull(resp)
-        assertEquals("Hello", resp!!.answers["0"])
-        assertEquals(1, FormRepository.getResponses(f.id!!)!!.size)
+        assertEquals("Hello", resp.answers["0"])
+
+        val responses = FormRepository.getResponses(id)
+        assertNotNull(responses)
+        assertEquals(1, responses.size)
     }
 }
