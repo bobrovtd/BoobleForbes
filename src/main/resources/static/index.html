@@ -7,94 +7,373 @@
 
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body class="bg-gray-100">
 <div id="root"></div>
 
 <script type="text/babel">
+const { useState, useEffect } = React;
 
-// -------------------------------
-// Компонент MyForms
-// -------------------------------
-const MyForms = ({ forms }) => {
+/*-----------------------------------------
+    МОИ ФОРМЫ
+------------------------------------------*/
+const MyForms = ({ setCurrentPage, forms, setForms }) => {
+    const [newFormTitle, setNewFormTitle] = useState("");
+
+    const handleCreate = async () => {
+        if (!newFormTitle.trim()) return;
+
+        const res = await fetch("/api/forms", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                title: newFormTitle.trim(),
+                description: "",
+                questions: []
+            })
+        });
+
+        const created = await res.json();
+        setForms(prev => [...prev, created]);
+        setNewFormTitle("");
+    };
+
     return (
         <div className="p-6 max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">Мои формы</h1>
 
-            {forms.length === 0 ? (
-                <p className="text-gray-500">Форм пока нет</p>
-            ) : (
-                <ul className="list-disc ml-6">
-                    {forms.map(form => (
-                        <li key={form.id}>{form.title}</li>
-                    ))}
-                </ul>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Мои формы</h1>
+
+                <button
+                    onClick={() => setCurrentPage({ name: "editor", formId: null })}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                >
+                    + Создать форму
+                </button>
+            </div>
+
+            {/* Создание формы */}
+            <div className="bg-white p-4 rounded-lg shadow mb-6">
+                <div className="flex">
+                    <input
+                        className="flex-1 border px-3 py-2 rounded-l-lg"
+                        placeholder="Название новой формы"
+                        value={newFormTitle}
+                        onChange={(e) => setNewFormTitle(e.target.value)}
+                    />
+                    <button
+                        onClick={handleCreate}
+                        className="bg-green-600 text-white px-4 py-2 rounded-r-lg"
+                    >
+                        Создать
+                    </button>
+                </div>
+            </div>
+
+            {/* Список */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {forms.map(form => (
+                    <div key={form.id} className="bg-white rounded-lg shadow p-5">
+
+                        <h3 className="text-lg font-semibold">{form.title}</h3>
+                        <p className="text-gray-500 text-sm mb-4">
+                            {form.description || "Нет описания"}
+                        </p>
+
+                        <button
+                            onClick={() => setCurrentPage({ name: "editor", formId: form.id })}
+                            className="w-full bg-blue-100 text-blue-700 rounded py-2"
+                        >
+                            Редактировать
+                        </button>
+
+                    </div>
+                ))}
+            </div>
+
+            {forms.length === 0 && (
+                <p className="text-gray-500 mt-6 text-center">Форм пока нет</p>
             )}
         </div>
     );
 };
 
-// -------------------------------
-// Компонент App
-// -------------------------------
-const App = () => {
-    const [currentPage, setCurrentPage] = React.useState('myForms');
-    const [forms, setForms] = React.useState([]);
 
-    React.useEffect(() => {
-        const fetchForms = async () => {
-            try {
-                const res = await fetch('/api/forms');
-                if (!res.ok) {
-                    throw new Error('Не удалось загрузить формы');
-                }
-                const data = await res.json();
-                setForms(data);
-            } catch (e) {
-                console.error(e);
-            }
+/*-----------------------------------------
+    РЕДАКТОР ФОРМЫ (с options)
+------------------------------------------*/
+const FormEditor = ({ setCurrentPage, forms, setForms, currentFormId }) => {
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [questions, setQuestions] = useState([]);
+
+    const [newQuestionText, setNewQuestionText] = useState("");
+    const [newQuestionType, setNewQuestionType] = useState("text");
+    const [newQuestionOptions, setNewQuestionOptions] = useState([""]);
+
+    /* Загрузка данных */
+    useEffect(() => {
+        if (!currentFormId) return;
+
+        const form = forms.find(f => f.id === currentFormId);
+        if (form) {
+            setTitle(form.title);
+            setDescription(form.description || "");
+            setQuestions(form.questions || []);
+        }
+    }, [currentFormId, forms]);
+
+    const supportsOptions = (type) =>
+        type === "radio" || type === "checkbox" || type === "dropdown";
+
+    /* Добавить вопрос */
+    const handleAddQuestion = () => {
+        if (!newQuestionText.trim()) return;
+
+        const base = {
+            id: Date.now(),
+            question: newQuestionText.trim(),
+            type: newQuestionType
         };
 
-        fetchForms();
-    }, []);
+        const newQ = supportsOptions(newQuestionType)
+            ? { ...base, options: newQuestionOptions.filter(o => o.trim() !== "") }
+            : { ...base, options: [] };
+
+        setQuestions(prev => [...prev, newQ]);
+        setNewQuestionText("");
+        setNewQuestionType("text");
+        setNewQuestionOptions([""]);
+    };
+
+    /* Сохранение формы */
+    const handleSaveForm = async () => {
+        const payload = {
+            title,
+            description,
+            questions
+        };
+
+        try {
+            let res;
+
+            if (currentFormId) {
+                res = await fetch(`/api/forms/${currentFormId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await fetch("/api/forms", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            }
+
+            const updated = await res.json();
+
+            if (currentFormId) {
+                setForms(prev => prev.map(f => f.id === currentFormId ? updated : f));
+            } else {
+                setForms(prev => [...prev, updated]);
+            }
+
+            setCurrentPage("myForms");
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка при сохранении формы");
+        }
+    };
+
+    /* Работа с options для нового вопроса */
+    const handleOptionChange = (index, value) => {
+        const copy = [...newQuestionOptions];
+        copy[index] = value;
+        setNewQuestionOptions(copy);
+    };
+
+    const handleAddOptionField = () => {
+        setNewQuestionOptions(prev => [...prev, ""]);
+    };
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <header className="bg-white shadow">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex items-center">
-                            <h1 className="text-xl font-bold text-gray-900">FormBuilder</h1>
-                        </div>
-                        <nav className="flex space-x-4">
-                            <button
-                                onClick={() => setCurrentPage('myForms')}
-                                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                                currentPage === 'myForms'
-                                    ? 'bg-blue-100 text-blue-700'
-                                    : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                            >
-                                Мои формы
-                            </button>
-                        </nav>
-                    </div>
-                </div>
-            </header>
+        <div className="p-6 max-w-3xl mx-auto">
 
-            <main>
-                {currentPage === 'myForms' && <MyForms forms={forms} />}
-            </main>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Редактор формы</h1>
+
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => setCurrentPage("myForms")}
+                        className="bg-gray-200 px-4 py-2 rounded"
+                    >
+                        Назад
+                    </button>
+
+                    <button
+                        onClick={handleSaveForm}
+                        className="bg-green-600 text-white px-4 py-2 rounded"
+                    >
+                        Сохранить
+                    </button>
+                </div>
+            </div>
+
+            {/* Блок формы */}
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+
+                <label className="block font-medium mb-1">Название формы</label>
+                <input
+                    className="w-full border px-4 py-2 rounded mb-4"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                />
+
+                <label className="block font-medium mb-1">Описание формы</label>
+                <textarea
+                    className="w-full border px-4 py-2 rounded mb-4"
+                    rows="3"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                />
+            </div>
+
+            {/* Добавить вопрос */}
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 className="text-xl font-semibold mb-4">Добавить вопрос</h2>
+
+                <label className="block mb-1">Текст вопроса</label>
+                <input
+                    className="w-full border px-4 py-2 rounded mb-4"
+                    placeholder="Введите текст вопроса"
+                    value={newQuestionText}
+                    onChange={(e) => setNewQuestionText(e.target.value)}
+                />
+
+                <label className="block mb-1">Тип вопроса</label>
+                <select
+                    className="w-full border px-4 py-2 rounded mb-4"
+                    value={newQuestionType}
+                    onChange={(e) => setNewQuestionType(e.target.value)}
+                >
+                    <option value="text">Короткий ответ</option>
+                    <option value="textarea">Длинный ответ</option>
+                    <option value="radio">Один вариант</option>
+                    <option value="checkbox">Несколько вариантов</option>
+                    <option value="dropdown">Выпадающий список</option>
+                </select>
+
+                {/* Варианты ответа для radio/checkbox/dropdown */}
+                {supportsOptions(newQuestionType) && (
+                    <div className="mb-4">
+                        <label className="block mb-2">Варианты ответа</label>
+                        {newQuestionOptions.map((opt, idx) => (
+                            <input
+                                key={idx}
+                                className="w-full border px-4 py-2 rounded mb-2"
+                                placeholder={`Вариант ${idx + 1}`}
+                                value={opt}
+                                onChange={(e) => handleOptionChange(idx, e.target.value)}
+                            />
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleAddOptionField}
+                            className="text-blue-600 text-sm mt-1"
+                        >
+                            + Добавить ещё вариант
+                        </button>
+                    </div>
+                )}
+
+                <button
+                    onClick={handleAddQuestion}
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                    Добавить вопрос
+                </button>
+            </div>
+
+            {/* Список вопросов */}
+            <div className="bg-white p-6 rounded-lg shadow">
+                <h2 className="text-xl font-semibold mb-4">Вопросы формы</h2>
+
+                {questions.length === 0 && (
+                    <p className="text-gray-500">Вопросов пока нет</p>
+                )}
+
+                {questions.map((q, idx) => (
+                    <div key={q.id} className="border-b py-3">
+                        <p className="font-medium">{idx + 1}. {q.question}</p>
+                        <p className="text-gray-600 text-sm mb-1">
+                            Тип: {q.type}
+                        </p>
+                        {supportsOptions(q.type) && q.options && q.options.length > 0 && (
+                            <ul className="list-disc ml-6 text-sm text-gray-700">
+                                {q.options.map((opt, i) => (
+                                    <li key={i}>{opt}</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                ))}
+            </div>
+
         </div>
     );
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
 
+/*-----------------------------------------
+    APP
+------------------------------------------*/
+const App = () => {
+    const [currentPage, setCurrentPage] = useState("myForms");
+    const [forms, setForms] = useState([]);
+
+    useEffect(() => {
+        fetch("/api/forms")
+            .then(res => res.json())
+            .then(data => setForms(data))
+            .catch(e => console.error(e));
+    }, []);
+
+    const renderPage = () => {
+        if (typeof currentPage === "object" && currentPage.name === "editor") {
+            return (
+                <FormEditor
+                    setCurrentPage={setCurrentPage}
+                    forms={forms}
+                    setForms={setForms}
+                    currentFormId={currentPage.formId}
+                />
+            );
+        }
+
+        return <MyForms setCurrentPage={setCurrentPage} forms={forms} setForms={setForms} />;
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-100">
+            <header className="bg-white shadow">
+                <div className="max-w-7xl mx-auto px-4 py-4">
+                    <h1 className="text-xl font-bold">FormBuilder</h1>
+                </div>
+            </header>
+
+            <main>{renderPage()}</main>
+        </div>
+    );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 
 </body>
