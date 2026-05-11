@@ -1,4 +1,4 @@
-# AI Forms (v1 MVP)
+﻿# AI Forms (v1 MVP)
 
 Web application for building and publishing forms with AI-assisted draft generation via Cerebras.
 
@@ -21,15 +21,15 @@ Web application for building and publishing forms with AI-assisted draft generat
 ```text
 project/
 +-- backend/
-�   +-- app/
-�   +-- migrations/
-�   +-- tests/
-�   +-- requirements.txt
-�   +-- main.py
+¦   +-- app/
+¦   +-- migrations/
+¦   +-- tests/
+¦   +-- requirements.txt
+¦   +-- main.py
 +-- frontend/
-�   +-- src/
-�   +-- public/
-�   +-- package.json
+¦   +-- src/
+¦   +-- public/
+¦   +-- package.json
 +-- docker-compose.yml
 +-- .env.example
 +-- README.md
@@ -119,7 +119,7 @@ Endpoint: `POST /api/v1/forms/generate-ai`
 Input:
 
 ```json
-{ "prompt": "?????? ????? ???????? ????? ?? ???????????..." }
+{ "prompt": "Создай форму обратной связи по мероприятию..." }
 ```
 
 Behavior:
@@ -150,3 +150,5 @@ python -m pytest backend/tests -q
 
 - Redis is optional in `docker-compose` under `optional` profile.
 - For AI checks, provide a valid `CEREBRAS_API_KEY` in `.env`.
+
+

@@ -10,12 +10,12 @@ def test_ai_service_generates_draft(monkeypatch: pytest.MonkeyPatch) -> None:
 
     def fake_call(_: str) -> dict:
         return {
-            "title": "??????",
-            "description": "????????",
+            "title": "Опрос",
+            "description": "Описание",
             "questions": [
-                {"text": "??? ???????", "type": "text", "required": True},
+                {"text": "Ваш отзыв", "type": "text", "required": True},
                 {
-                    "text": "??????",
+                    "text": "Оценка",
                     "type": "scale",
                     "required": True,
                     "min_value": 1,
@@ -27,9 +27,9 @@ def test_ai_service_generates_draft(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(service, "_call_cerebras", fake_call)
 
-    draft = service.generate_form_draft("?????? ?????")
+    draft = service.generate_form_draft("Создай форму")
 
-    assert draft.title == "??????"
+    assert draft.title == "Опрос"
     assert len(draft.questions) == 2
     assert draft.questions[1].config["max_value"] == 10
 

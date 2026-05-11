@@ -10,8 +10,8 @@ export const createEmptyQuestion = (orderIndex: number, type: QuestionType = "te
   options:
     type === "single_choice" || type === "multiple_choice"
       ? [
-          { text: "??????? 1", order_index: 0 },
-          { text: "??????? 2", order_index: 1 },
+          { text: "Вариант 1", order_index: 0 },
+          { text: "Вариант 2", order_index: 1 },
         ]
       : [],
 });

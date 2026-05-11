@@ -25,7 +25,7 @@ export const AppShell = (): JSX.Element => {
               onClick={onLogout}
               className="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
             >
-              ?????
+              Выйти
             </button>
           </div>
         </div>

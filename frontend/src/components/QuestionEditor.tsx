@@ -14,11 +14,11 @@ interface QuestionEditorProps {
 }
 
 const QUESTION_TYPE_OPTIONS: Array<{ value: QuestionType; label: string }> = [
-  { value: "text", label: "?????" },
-  { value: "single_choice", label: "????????? ?????" },
-  { value: "multiple_choice", label: "????????????? ?????" },
-  { value: "scale", label: "?????" },
-  { value: "date", label: "????" },
+  { value: "text", label: "Текст" },
+  { value: "single_choice", label: "Один вариант" },
+  { value: "multiple_choice", label: "Несколько вариантов" },
+  { value: "scale", label: "Шкала" },
+  { value: "date", label: "Дата" },
 ];
 
 export const QuestionEditor = ({
@@ -46,8 +46,8 @@ export const QuestionEditor = ({
 
     if (nextType === "single_choice" || nextType === "multiple_choice") {
       nextOptions = [
-        { text: "??????? 1", order_index: 0 },
-        { text: "??????? 2", order_index: 1 },
+        { text: "Вариант 1", order_index: 0 },
+        { text: "Вариант 2", order_index: 1 },
       ];
     }
 
@@ -59,7 +59,7 @@ export const QuestionEditor = ({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">?????? #{index + 1}</h3>
+        <h3 className="font-semibold text-slate-900">Вопрос #{index + 1}</h3>
         <div className="flex gap-2">
           <button
             type="button"
@@ -67,7 +67,7 @@ export const QuestionEditor = ({
             disabled={!canMoveUp}
             className="rounded-md border border-slate-300 px-2 py-1 text-xs disabled:opacity-40"
           >
-            ?
+            ↑
           </button>
           <button
             type="button"
@@ -75,21 +75,21 @@ export const QuestionEditor = ({
             disabled={!canMoveDown}
             className="rounded-md border border-slate-300 px-2 py-1 text-xs disabled:opacity-40"
           >
-            ?
+            ↓
           </button>
           <button
             type="button"
             onClick={onRemove}
             className="rounded-md border border-rose-300 px-2 py-1 text-xs text-rose-600"
           >
-            ???????
+            Удалить
           </button>
         </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">???</span>
+          <span className="mb-1 block text-sm font-medium text-slate-700">Тип</span>
           <select
             value={question.type}
             onChange={onTypeChange}
@@ -104,7 +104,7 @@ export const QuestionEditor = ({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">????????????</span>
+          <span className="mb-1 block text-sm font-medium text-slate-700">Обязательный</span>
           <input
             type="checkbox"
             checked={question.is_required}
@@ -115,29 +115,29 @@ export const QuestionEditor = ({
       </div>
 
       <label className="mt-3 block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">????? ???????</span>
+        <span className="mb-1 block text-sm font-medium text-slate-700">Текст вопроса</span>
         <input
           value={question.text}
           onChange={(event) => onChange({ ...question, text: event.target.value })}
           className="w-full rounded-md border border-slate-300 px-3 py-2"
-          placeholder="??????? ??????"
+          placeholder="Введите вопрос"
         />
       </label>
 
       <label className="mt-3 block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">?????????</span>
+        <span className="mb-1 block text-sm font-medium text-slate-700">Описание</span>
         <input
           value={question.description ?? ""}
           onChange={(event) => onChange({ ...question, description: event.target.value })}
           className="w-full rounded-md border border-slate-300 px-3 py-2"
-          placeholder="???????? (?????????????)"
+          placeholder="Описание (необязательно)"
         />
       </label>
 
       {question.type === "text" && (
         <div className="mt-3 grid gap-3 md:grid-cols-3">
           <label>
-            <span className="mb-1 block text-sm font-medium text-slate-700">???. ?????</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Мин. длина</span>
             <input
               type="number"
               value={String(question.config.min_length ?? "")}
@@ -146,7 +146,7 @@ export const QuestionEditor = ({
             />
           </label>
           <label>
-            <span className="mb-1 block text-sm font-medium text-slate-700">????. ?????</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Макс. длина</span>
             <input
               type="number"
               value={String(question.config.max_length ?? "")}
@@ -161,7 +161,7 @@ export const QuestionEditor = ({
               onChange={(event) => updateConfig("multiline", event.target.checked)}
               className="h-4 w-4"
             />
-            <span className="text-sm text-slate-700">?????????????</span>
+            <span className="text-sm text-slate-700">Многострочный</span>
           </label>
         </div>
       )}
@@ -169,7 +169,7 @@ export const QuestionEditor = ({
       {isChoice && (
         <div className="mt-3 rounded-lg border border-slate-200 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-semibold text-slate-800">???????? ??????</span>
+            <span className="text-sm font-semibold text-slate-800">Варианты ответа</span>
             <button
               type="button"
               onClick={() =>
@@ -177,13 +177,13 @@ export const QuestionEditor = ({
                   ...question,
                   options: [
                     ...question.options,
-                    { text: `??????? ${question.options.length + 1}`, order_index: question.options.length },
+                    { text: `Вариант ${question.options.length + 1}`, order_index: question.options.length },
                   ],
                 })
               }
               className="rounded-md border border-sky-300 px-2 py-1 text-xs text-sky-700"
             >
-              + ???????
+              + Вариант
             </button>
           </div>
 
@@ -223,14 +223,14 @@ export const QuestionEditor = ({
                 onChange={(event) => updateConfig("allow_other", event.target.checked)}
                 className="h-4 w-4"
               />
-              <span className="text-sm text-slate-700">????????? "???? ???????"</span>
+              <span className="text-sm text-slate-700">Разрешить "Свой вариант"</span>
             </label>
           )}
 
           {question.type === "multiple_choice" && (
             <div className="mt-2 grid gap-2 md:grid-cols-2">
               <label>
-                <span className="mb-1 block text-sm">???. ?????????</span>
+                <span className="mb-1 block text-sm">Мин. выбрано</span>
                 <input
                   type="number"
                   value={String(question.config.min_selected ?? "")}
@@ -239,7 +239,7 @@ export const QuestionEditor = ({
                 />
               </label>
               <label>
-                <span className="mb-1 block text-sm">????. ?????????</span>
+                <span className="mb-1 block text-sm">Макс. выбрано</span>
                 <input
                   type="number"
                   value={String(question.config.max_selected ?? "")}
@@ -273,7 +273,7 @@ export const QuestionEditor = ({
             />
           </label>
           <label>
-            <span className="mb-1 block text-sm font-medium text-slate-700">???</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Шаг</span>
             <input
               type="number"
               step="0.1"
@@ -293,7 +293,7 @@ export const QuestionEditor = ({
             onChange={(event) => updateConfig("with_time", event.target.checked)}
             className="h-4 w-4"
           />
-          <span className="text-sm text-slate-700">???????? ?????</span>
+          <span className="text-sm text-slate-700">Включить время</span>
         </label>
       )}
     </div>

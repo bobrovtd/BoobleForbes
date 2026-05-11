@@ -30,7 +30,7 @@ def test_limit_one_response_per_user(db_session: Session) -> None:
     question = Question(
         form_id=form.id,
         type=QuestionType.text,
-        text="???????????",
+        text="Комментарий",
         order_index=0,
         is_required=False,
         config={},

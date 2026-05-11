@@ -24,7 +24,7 @@ export const ResponsesPage = (): JSX.Element => {
       setResponses(responseRows);
       setAnalytics(analyticsData);
     } catch {
-      setError("?? ??????? ????????? ??????");
+      setError("Не удалось загрузить ответы");
     } finally {
       setLoading(false);
     }
@@ -56,42 +56,42 @@ export const ResponsesPage = (): JSX.Element => {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900">?????? ? ?????????</h1>
-          <p className="text-sm text-slate-600">????? #{formId}</p>
+          <h1 className="font-display text-3xl font-bold text-slate-900">Ответы и аналитика</h1>
+          <p className="text-sm text-slate-600">Форма #{formId}</p>
         </div>
 
         <div className="flex gap-2">
           <Link to={`/forms/${formId}/edit`} className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700">
-            ? ?????
+            К форме
           </Link>
           <button
             type="button"
             onClick={onExport}
             className="rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white"
           >
-            ??????? CSV
+            Скачать CSV
           </button>
         </div>
       </div>
 
-      {loading && <p className="text-slate-600">????????...</p>}
+      {loading && <p className="text-slate-600">Загрузка...</p>}
       {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
 
       {analytics && (
         <section className="grid gap-4 lg:grid-cols-2">
           <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">??????</h2>
-            <p className="mt-2 text-sm text-slate-700">????? ???????: {analytics.total_responses}</p>
+            <h2 className="font-semibold text-slate-900">Сводка</h2>
+            <p className="mt-2 text-sm text-slate-700">Всего ответов: {analytics.total_responses}</p>
           </article>
 
           <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">???????? ???????</h2>
+            <h2 className="font-semibold text-slate-900">Числовые вопросы</h2>
             <div className="mt-2 space-y-3">
               {analytics.scale_questions.map((item) => (
                 <div key={item.question_id} className="rounded-md bg-slate-50 p-3 text-sm">
                   <p className="font-medium text-slate-800">{item.question_text}</p>
-                  <p className="text-slate-600">???????: {item.average ?? "-"}</p>
-                  <p className="text-slate-600">???????: {item.median ?? "-"}</p>
+                  <p className="text-slate-600">Среднее: {item.average ?? "-"}</p>
+                  <p className="text-slate-600">Медиана: {item.median ?? "-"}</p>
                 </div>
               ))}
             </div>
@@ -102,7 +102,7 @@ export const ResponsesPage = (): JSX.Element => {
       {analytics && (
         <section className="grid gap-4 lg:grid-cols-2">
           <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">??????</h2>
+            <h2 className="font-semibold text-slate-900">Варианты</h2>
             <div className="mt-3 space-y-3">
               {analytics.choice_questions.map((item) => (
                 <div key={item.question_id} className="rounded-md border border-slate-200 p-3">
@@ -121,7 +121,7 @@ export const ResponsesPage = (): JSX.Element => {
           </article>
 
           <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">????????? ??????</h2>
+            <h2 className="font-semibold text-slate-900">Текстовые ответы</h2>
             <div className="mt-3 space-y-3">
               {analytics.text_questions.map((item) => (
                 <div key={item.question_id} className="rounded-md border border-slate-200 p-3">
@@ -130,7 +130,7 @@ export const ResponsesPage = (): JSX.Element => {
                     {item.responses.slice(0, 10).map((text, index) => (
                       <li key={index}>{text}</li>
                     ))}
-                    {item.responses.length === 0 && <li>??? ???????</li>}
+                    {item.responses.length === 0 && <li>Нет ответов</li>}
                   </ul>
                 </div>
               ))}
@@ -140,13 +140,13 @@ export const ResponsesPage = (): JSX.Element => {
       )}
 
       <section className="overflow-auto rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="mb-3 font-semibold text-slate-900">??????? ???????</h2>
+        <h2 className="mb-3 font-semibold text-slate-900">Таблица ответов</h2>
         <table className="min-w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-left text-slate-600">
               <th className="px-2 py-2">ID</th>
-              <th className="px-2 py-2">????????????</th>
-              <th className="px-2 py-2">????</th>
+              <th className="px-2 py-2">Пользователь</th>
+              <th className="px-2 py-2">Дата</th>
               {answerColumns.map((column) => (
                 <th key={column} className="px-2 py-2">{column}</th>
               ))}
@@ -156,7 +156,7 @@ export const ResponsesPage = (): JSX.Element => {
             {responses.map((row) => (
               <tr key={row.response_id} className="border-b border-slate-100 align-top">
                 <td className="px-2 py-2">{row.response_id}</td>
-                <td className="px-2 py-2">{row.respondent_id ?? "??????"}</td>
+                <td className="px-2 py-2">{row.respondent_id ?? "аноним"}</td>
                 <td className="px-2 py-2">{new Date(row.submitted_at).toLocaleString()}</td>
                 {answerColumns.map((column) => (
                   <td key={`${row.response_id}-${column}`} className="px-2 py-2">
@@ -167,7 +167,7 @@ export const ResponsesPage = (): JSX.Element => {
             ))}
           </tbody>
         </table>
-        {responses.length === 0 && <p className="mt-2 text-sm text-slate-500">???? ??? ???????.</p>}
+        {responses.length === 0 && <p className="mt-2 text-sm text-slate-500">Пока нет ответов.</p>}
       </section>
     </div>
   );

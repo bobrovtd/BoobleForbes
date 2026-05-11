@@ -25,7 +25,7 @@ export const PublicFormPage = (): JSX.Element => {
         const data = await formsService.getPublicBySlug(slug);
         setForm(data);
       } catch {
-        setError("????? ?????????? ??? ?? ???????");
+        setError("Форма недоступна или не найдена");
       } finally {
         setLoading(false);
       }
@@ -61,7 +61,7 @@ export const PublicFormPage = (): JSX.Element => {
       setSubmitted(true);
       setError(null);
     } catch {
-      setError("?? ??????? ????????? ?????. ????????? ?????????? ?????.");
+      setError("Не удалось отправить форму. Проверьте заполненные поля.");
     }
   };
 
@@ -70,20 +70,20 @@ export const PublicFormPage = (): JSX.Element => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-600">???????? ?????...</div>;
+    return <div className="p-8 text-center text-slate-600">Загрузка формы...</div>;
   }
 
   if (submitted) {
     return (
       <div className="mx-auto mt-20 max-w-xl rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-        <h1 className="font-display text-2xl font-bold text-emerald-800">???????!</h1>
-        <p className="mt-2 text-sm text-emerald-700">??? ????? ??????? ?????????.</p>
+        <h1 className="font-display text-2xl font-bold text-emerald-800">Спасибо!</h1>
+        <p className="mt-2 text-sm text-emerald-700">Ваш ответ успешно отправлен.</p>
       </div>
     );
   }
 
   if (!form) {
-    return <div className="p-8 text-center text-rose-700">{error ?? "????? ??????????"}</div>;
+    return <div className="p-8 text-center text-rose-700">{error ?? "Форма недоступна"}</div>;
   }
 
   return (
@@ -93,7 +93,7 @@ export const PublicFormPage = (): JSX.Element => {
         {form.description && <p className="mt-2 text-slate-600">{form.description}</p>}
         {form.access_mode === "authenticated" && (
           <p className="mt-2 text-sm text-sky-700">
-            ??? ???????? ????????? ????. <Link to="/login" className="underline">?????</Link>
+            Для отправки требуется вход. <Link to="/login" className="underline">Войти</Link>
           </p>
         )}
       </div>
@@ -204,7 +204,7 @@ export const PublicFormPage = (): JSX.Element => {
         {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
 
         <button type="submit" className="w-full rounded-md bg-sky-600 px-4 py-2 font-medium text-white">
-          ?????????
+          Отправить
         </button>
       </form>
     </div>

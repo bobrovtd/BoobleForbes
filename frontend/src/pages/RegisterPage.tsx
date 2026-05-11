@@ -23,7 +23,7 @@ export const RegisterPage = (): JSX.Element => {
       await register({ name, email, password, role });
       navigate("/forms");
     } catch {
-      setError("?? ??????? ???????????????? ????????????")
+      setError("Не удалось зарегистрировать пользователя")
     } finally {
       setLoading(false);
     }
@@ -32,12 +32,12 @@ export const RegisterPage = (): JSX.Element => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-grain bg-slate-100 px-4">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="font-display text-2xl font-bold text-ink">???????????</h1>
-        <p className="mt-1 text-sm text-slate-600">???????? ??????? ?????? ??? ?????? ? ???????.</p>
+        <h1 className="font-display text-2xl font-bold text-ink">Регистрация</h1>
+        <p className="mt-1 text-sm text-slate-600">Создайте аккаунт, чтобы работать с формами.</p>
 
         <form className="mt-5 space-y-4" onSubmit={onSubmit}>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">???</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Имя</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -57,7 +57,7 @@ export const RegisterPage = (): JSX.Element => {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">??????</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Пароль</span>
             <input
               type="password"
               value={password}
@@ -69,7 +69,7 @@ export const RegisterPage = (): JSX.Element => {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">????</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Роль</span>
             <select
               value={role}
               onChange={(event) => setRole(event.target.value as "creator" | "respondent")}
@@ -87,12 +87,12 @@ export const RegisterPage = (): JSX.Element => {
             disabled={loading}
             className="w-full rounded-md bg-emerald-600 px-4 py-2 font-medium text-white disabled:opacity-50"
           >
-            {loading ? "????????..." : "??????? ???????"}
+            {loading ? "Регистрация..." : "Создать аккаунт"}
           </button>
         </form>
 
         <p className="mt-4 text-sm text-slate-600">
-          ??? ???? ???????? <Link className="text-sky-700 underline" to="/login">?????</Link>
+          Уже есть аккаунт? <Link className="text-sky-700 underline" to="/login">Войти</Link>
         </p>
       </div>
     </div>

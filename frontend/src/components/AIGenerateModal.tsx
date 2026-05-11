@@ -26,7 +26,7 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
       const generated = await formsService.generateAI(prompt);
       setDraft(generated);
     } catch {
-      setError("?? ??????? ????????????? ?????. ????????? API-???? Cerebras ? ?????????? ?????.");
+      setError("Не удалось сгенерировать форму. Проверьте API-ключ Cerebras и повторите попытку.");
     } finally {
       setLoading(false);
     }
@@ -47,11 +47,11 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
       <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-5">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h3 className="font-display text-xl font-bold text-slate-900">????????? ????? ?? ????????</h3>
-            <p className="mt-1 text-sm text-slate-600">??????? ???????? ?? 2000 ????????.</p>
+            <h3 className="font-display text-xl font-bold text-slate-900">Сгенерировать форму по описанию</h3>
+            <p className="mt-1 text-sm text-slate-600">Введите описание до 2000 символов.</p>
           </div>
           <button type="button" onClick={onClose} className="rounded-md border border-slate-300 px-2 py-1 text-sm">
-            ???????
+            Закрыть
           </button>
         </div>
 
@@ -60,7 +60,7 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
           onChange={(event) => setPrompt(event.target.value.slice(0, 2000))}
           rows={5}
           className="w-full rounded-md border border-slate-300 px-3 py-2"
-          placeholder="????????: ?????? ?????? ???????? ????? ?? ???????????..."
+          placeholder="Например: сделать форму обратной связи по мероприятию..."
         />
 
         <div className="mt-3 flex items-center justify-between">
@@ -71,7 +71,7 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
             disabled={loading || prompt.trim().length === 0}
             className="rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            {loading ? "?????????..." : "?????????????"}
+            {loading ? "Генерация..." : "Сгенерировать"}
           </button>
         </div>
 
@@ -79,7 +79,7 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
 
         {draft && (
           <div className="mt-5">
-            <h4 className="text-lg font-semibold text-slate-900">????????????</h4>
+            <h4 className="text-lg font-semibold text-slate-900">Предпросмотр</h4>
             <p className="text-sm text-slate-600">{draft.title}</p>
             {draft.description && <p className="mt-1 text-sm text-slate-500">{draft.description}</p>}
 
@@ -89,9 +89,9 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
                   <p className="font-medium text-slate-800">
                     {index + 1}. {question.text}
                   </p>
-                  <p className="text-sm text-slate-500">???: {question.type}</p>
+                  <p className="text-sm text-slate-500">Тип: {question.type}</p>
                   {question.options.length > 0 && (
-                    <p className="text-sm text-slate-500">?????: {question.options.map((option) => option.text).join(", ")}</p>
+                    <p className="text-sm text-slate-500">Ответы: {question.options.map((option) => option.text).join(", ")}</p>
                   )}
                 </div>
               ))}
@@ -103,7 +103,7 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
                 onClick={handleApply}
                 className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white"
               >
-                ????????? ????????
+                Применить результат
               </button>
             </div>
           </div>

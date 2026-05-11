@@ -15,7 +15,7 @@ const HomeRedirect = (): JSX.Element => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-600">????????...</div>;
+    return <div className="p-8 text-center text-slate-600">Загрузка...</div>;
   }
 
   return <Navigate to={user ? "/forms" : "/login"} replace />;

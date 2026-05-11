@@ -41,7 +41,7 @@ export const FormBuilderPage = (): JSX.Element => {
         const form = await formsService.getById(Number(id));
         hydratePayload(form);
       } catch {
-        setError("?? ??????? ????????? ?????");
+        setError("Не удалось загрузить форму");
       } finally {
         setLoading(false);
       }
@@ -105,16 +105,16 @@ export const FormBuilderPage = (): JSX.Element => {
 
   const validateBeforeSave = (): string | null => {
     if (!payload.title.trim()) {
-      return "??????? ????????? ?????";
+      return "Введите название формы";
     }
     if (payload.questions.length === 0) {
-      return "???????? ???? ?? ???? ??????";
+      return "Добавьте хотя бы один вопрос";
     }
     if (payload.questions.length > 100) {
-      return "???????? 100 ????????";
+      return "Не больше 100 вопросов";
     }
     if (payload.questions.some((question) => !question.text.trim())) {
-      return "?????? ?????? ?????? ????????? ?????";
+      return "Каждый вопрос должен содержать текст";
     }
     return null;
   };
@@ -154,9 +154,9 @@ export const FormBuilderPage = (): JSX.Element => {
         hydratePayload(created);
         navigate(`/forms/${created.id}/edit`, { replace: true });
       }
-      setSuccess("????? ?????????");
+      setSuccess("Форма сохранена");
     } catch {
-      setError("?????? ?????????? ?????");
+      setError("Ошибка сохранения формы");
     } finally {
       setSaving(false);
     }
@@ -164,21 +164,21 @@ export const FormBuilderPage = (): JSX.Element => {
 
   const publishForm = async (): Promise<void> => {
     if (!formId) {
-      setError("??????? ????????? ?????");
+      setError("Сначала сохраните форму");
       return;
     }
 
     try {
       const result = await formsService.publish(formId);
       setPublicSlug(result.public_slug);
-      window.prompt("????????? ??????:", result.public_url);
+      window.prompt("Публичная ссылка:", result.public_url);
     } catch {
-      setError("?? ??????? ???????????? ?????");
+      setError("Не удалось опубликовать форму");
     }
   };
 
   if (loading) {
-    return <p className="text-slate-600">???????? ?????...</p>;
+    return <p className="text-slate-600">Загрузка формы...</p>;
   }
 
   return (
@@ -186,9 +186,9 @@ export const FormBuilderPage = (): JSX.Element => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl font-bold text-slate-900">
-            {isEdit ? "?????????????? ?????" : "????? ?????"}
+            {isEdit ? "Редактирование формы" : "Новая форма"}
           </h1>
-          <p className="text-sm text-slate-600">???????? ??????? ? ????????? ????????? ? ??????? AI.</p>
+          <p className="text-sm text-slate-600">Настройте вопросы и параметры публикации с помощью AI.</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -197,7 +197,7 @@ export const FormBuilderPage = (): JSX.Element => {
             onClick={() => setAIModalOpen(true)}
             className="rounded-md border border-sky-300 px-3 py-2 text-sm text-sky-700"
           >
-            ????????????? ?? ????????
+            Сгенерировать по описанию
           </button>
           <button
             type="button"
@@ -205,14 +205,14 @@ export const FormBuilderPage = (): JSX.Element => {
             disabled={saving}
             className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            {saving ? "??????????..." : "?????????"}
+            {saving ? "Сохранение..." : "Сохранить"}
           </button>
           <button
             type="button"
             onClick={publishForm}
             className="rounded-md border border-emerald-300 px-3 py-2 text-sm text-emerald-700"
           >
-            ????????????
+            Опубликовать
           </button>
         </div>
       </div>
@@ -222,24 +222,24 @@ export const FormBuilderPage = (): JSX.Element => {
 
       {formPublicUrl && (
         <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          ????????? ??????: <Link className="underline" to={`/f/${publicSlug}`}>{formPublicUrl}</Link>
+          Публичная ссылка: <Link className="underline" to={`/f/${publicSlug}`}>{formPublicUrl}</Link>
         </div>
       )}
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="grid gap-3 md:grid-cols-2">
           <label>
-            <span className="mb-1 block text-sm font-medium text-slate-700">?????????</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Название</span>
             <input
               value={payload.title}
               onChange={(event) => setPayload({ ...payload, title: event.target.value })}
               className="w-full rounded-md border border-slate-300 px-3 py-2"
-              placeholder="???????? ?????"
+              placeholder="Название формы"
             />
           </label>
 
           <label>
-            <span className="mb-1 block text-sm font-medium text-slate-700">????? ???????</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Режим доступа</span>
             <select
               value={payload.access_mode}
               onChange={(event) => setPayload({ ...payload, access_mode: event.target.value as AccessMode })}
@@ -253,7 +253,7 @@ export const FormBuilderPage = (): JSX.Element => {
         </div>
 
         <label className="mt-3 block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">????????</span>
+          <span className="mb-1 block text-sm font-medium text-slate-700">Описание</span>
           <textarea
             value={payload.description ?? ""}
             onChange={(event) => setPayload({ ...payload, description: event.target.value })}
@@ -269,13 +269,13 @@ export const FormBuilderPage = (): JSX.Element => {
             onChange={(event) => setPayload({ ...payload, limit_one_per_user: event.target.checked })}
             className="h-4 w-4"
           />
-          ?????????? ????? ??????? ?? ???????????? (?????? ??? ??????????????)
+          Ограничить одним ответом на пользователя (только для авторизованных)
         </label>
       </section>
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-slate-700">???????? ??????:</span>
+          <span className="text-sm font-medium text-slate-700">Добавить вопрос:</span>
           {["text", "single_choice", "multiple_choice", "scale", "date"].map((type) => (
             <button
               key={type}
@@ -311,7 +311,7 @@ export const FormBuilderPage = (): JSX.Element => {
 
         {payload.questions.length === 0 && (
           <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
-            ? ????? ???? ??? ????????.
+            В форме пока нет вопросов.
           </div>
         )}
       </section>

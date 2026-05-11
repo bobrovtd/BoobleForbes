@@ -21,7 +21,7 @@ export const LoginPage = (): JSX.Element => {
       await login({ email, password });
       navigate("/forms");
     } catch {
-      setError("???????? email ??? ??????");
+      setError("Проверьте email или пароль");
     } finally {
       setLoading(false);
     }
@@ -30,8 +30,8 @@ export const LoginPage = (): JSX.Element => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-grain bg-slate-100 px-4">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="font-display text-2xl font-bold text-ink">???? ? AI Forms</h1>
-        <p className="mt-1 text-sm text-slate-600">?????????? ??????? ? ???????? ? ????? ?????.</p>
+        <h1 className="font-display text-2xl font-bold text-ink">Вход в AI Forms</h1>
+        <p className="mt-1 text-sm text-slate-600">Войдите, чтобы создавать и заполнять формы.</p>
 
         <form className="mt-5 space-y-4" onSubmit={onSubmit}>
           <label className="block">
@@ -46,7 +46,7 @@ export const LoginPage = (): JSX.Element => {
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">??????</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Пароль</span>
             <input
               type="password"
               value={password}
@@ -63,12 +63,12 @@ export const LoginPage = (): JSX.Element => {
             disabled={loading}
             className="w-full rounded-md bg-sky-600 px-4 py-2 font-medium text-white disabled:opacity-50"
           >
-            {loading ? "????..." : "?????"}
+            {loading ? "Вход..." : "Войти"}
           </button>
         </form>
 
         <p className="mt-4 text-sm text-slate-600">
-          ??? ????????? <Link className="text-sky-700 underline" to="/register">??????????????????</Link>
+          Нет аккаунта? <Link className="text-sky-700 underline" to="/register">Зарегистрироваться</Link>
         </p>
       </div>
     </div>
