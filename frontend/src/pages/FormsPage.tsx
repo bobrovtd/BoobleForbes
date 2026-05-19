@@ -44,48 +44,48 @@ export const FormsPage = (): JSX.Element => {
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900">Мои формы</h1>
-          <p className="text-sm text-slate-600">Создавайте, публикуйте и анализируйте ответы.</p>
+          <h1 className="font-display text-3xl font-bold text-[var(--text)]">Мои формы</h1>
+          <p className="text-sm muted">Создавайте, публикуйте и анализируйте ответы.</p>
         </div>
         <Link
           to="/forms/new"
-          className="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
+          className="btn btn-primary"
         >
           + Создать форму
         </Link>
       </div>
 
-      {loading && <p className="text-slate-600">Загрузка...</p>}
-      {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {loading && <p className="muted">Загрузка...</p>}
+      {error && <p className="notice-danger rounded-lg px-3 py-2 text-sm">{error}</p>}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {forms.map((form) => (
-          <article key={form.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">{form.title}</h2>
-            <p className="mt-1 text-xs text-slate-500">Создана: {new Date(form.created_at).toLocaleString()}</p>
-            <p className="mt-1 text-xs text-slate-500">Доступ: {form.access_mode}</p>
-            <p className="mt-1 text-xs text-slate-500">
+          <article key={form.id} className="panel p-4 transition hover:-translate-y-0.5">
+            <h2 className="font-semibold text-[var(--text)]">{form.title}</h2>
+            <p className="mt-1 text-xs soft">Создана: {new Date(form.created_at).toLocaleString()}</p>
+            <p className="mt-1 text-xs soft">Доступ: {form.access_mode}</p>
+            <p className="mt-1 text-xs soft">
               Статус: {form.is_published ? "опубликована" : "черновик"}
             </p>
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
-              <Link className="rounded border border-slate-300 px-2 py-1" to={`/forms/${form.id}/edit`}>
+              <Link className="btn btn-secondary h-8 px-2 text-xs" to={`/forms/${form.id}/edit`}>
                 Редактировать
               </Link>
-              <Link className="rounded border border-slate-300 px-2 py-1" to={`/forms/${form.id}/responses`}>
+              <Link className="btn btn-secondary h-8 px-2 text-xs" to={`/forms/${form.id}/responses`}>
                 Ответы
               </Link>
               <button
                 type="button"
                 onClick={() => onPublish(form.id)}
-                className="rounded border border-sky-300 px-2 py-1 text-sky-700"
+                className="btn btn-primary h-8 px-2 text-xs"
               >
                 Опубликовать
               </button>
               <button
                 type="button"
                 onClick={() => onDelete(form.id)}
-                className="rounded border border-rose-300 px-2 py-1 text-rose-700"
+                className="btn btn-danger h-8 px-2 text-xs"
               >
                 Удалить
               </button>
@@ -95,7 +95,7 @@ export const FormsPage = (): JSX.Element => {
       </div>
 
       {!loading && forms.length === 0 && (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+        <div className="panel border-dashed p-6 text-sm muted">
           Форм пока нет. Создайте первую форму вручную или через AI.
         </div>
       )}

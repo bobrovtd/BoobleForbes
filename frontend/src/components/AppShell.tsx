@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 
 export const AppShell = (): JSX.Element => {
@@ -12,18 +13,22 @@ export const AppShell = (): JSX.Element => {
   };
 
   return (
-    <div className="min-h-screen bg-grain bg-slate-100">
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
+    <div className="app-shell">
+      <header className="glass-header sticky top-0 z-30">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link to="/forms" className="font-display text-xl font-bold tracking-tight text-ink">
-            AI Forms
+          <Link to="/forms" className="flex items-center gap-3 font-display text-xl font-bold tracking-tight text-[var(--text)]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--primary)] text-sm text-white shadow-sm">
+              AI
+            </span>
+            <span>Forms</span>
           </Link>
-          <div className="flex items-center gap-3 text-sm text-slate-600">
-            <span>{user?.email}</span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="badge hidden md:inline-flex">{user?.email}</span>
+            <ThemeToggle />
             <button
               type="button"
               onClick={onLogout}
-              className="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100"
+              className="btn btn-secondary h-10 px-3"
             >
               Выйти
             </button>

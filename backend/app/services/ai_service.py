@@ -129,8 +129,11 @@ class AIService:
                 ],
                 response_format={
                     "type": "json_schema",
-                    "json_schema": FORM_JSON_SCHEMA,
-                    "strict": True,
+                    "json_schema": {
+                        "name": "generated_form",
+                        "strict": True,
+                        "schema": FORM_JSON_SCHEMA,
+                    },
                 },
                 temperature=0.2,
             )

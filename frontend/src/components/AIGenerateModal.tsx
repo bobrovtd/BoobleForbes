@@ -43,14 +43,14 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-5">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+      <div className="panel max-h-[90vh] w-full max-w-3xl overflow-y-auto p-5">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h3 className="font-display text-xl font-bold text-slate-900">Сгенерировать форму по описанию</h3>
-            <p className="mt-1 text-sm text-slate-600">Введите описание до 2000 символов.</p>
+            <h3 className="font-display text-xl font-bold text-[var(--text)]">Сгенерировать форму по описанию</h3>
+            <p className="mt-1 text-sm muted">Введите описание до 2000 символов.</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-md border border-slate-300 px-2 py-1 text-sm">
+          <button type="button" onClick={onClose} className="btn btn-secondary h-9 px-3 text-sm">
             Закрыть
           </button>
         </div>
@@ -59,39 +59,39 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
           value={prompt}
           onChange={(event) => setPrompt(event.target.value.slice(0, 2000))}
           rows={5}
-          className="w-full rounded-md border border-slate-300 px-3 py-2"
+          className="field"
           placeholder="Например: сделать форму обратной связи по мероприятию..."
         />
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs text-slate-500">{prompt.length}/2000</span>
+          <span className="text-xs soft">{prompt.length}/2000</span>
           <button
             type="button"
             onClick={handleGenerate}
             disabled={loading || prompt.trim().length === 0}
-            className="rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="btn btn-primary disabled:opacity-50"
           >
             {loading ? "Генерация..." : "Сгенерировать"}
           </button>
         </div>
 
-        {error && <p className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+        {error && <p className="notice-danger mt-3 rounded-lg px-3 py-2 text-sm">{error}</p>}
 
         {draft && (
           <div className="mt-5">
-            <h4 className="text-lg font-semibold text-slate-900">Предпросмотр</h4>
-            <p className="text-sm text-slate-600">{draft.title}</p>
-            {draft.description && <p className="mt-1 text-sm text-slate-500">{draft.description}</p>}
+            <h4 className="text-lg font-semibold text-[var(--text)]">Предпросмотр</h4>
+            <p className="text-sm muted">{draft.title}</p>
+            {draft.description && <p className="mt-1 text-sm soft">{draft.description}</p>}
 
             <div className="mt-3 space-y-2">
               {draft.questions.map((question, index) => (
-                <div key={index} className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                  <p className="font-medium text-slate-800">
+                <div key={index} className="panel-muted p-3">
+                  <p className="font-medium text-[var(--text)]">
                     {index + 1}. {question.text}
                   </p>
-                  <p className="text-sm text-slate-500">Тип: {question.type}</p>
+                  <p className="text-sm soft">Тип: {question.type}</p>
                   {question.options.length > 0 && (
-                    <p className="text-sm text-slate-500">Ответы: {question.options.map((option) => option.text).join(", ")}</p>
+                    <p className="text-sm soft">Ответы: {question.options.map((option) => option.text).join(", ")}</p>
                   )}
                 </div>
               ))}
@@ -101,7 +101,7 @@ export const AIGenerateModal = ({ open, onClose, onApply }: AIGenerateModalProps
               <button
                 type="button"
                 onClick={handleApply}
-                className="rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white"
+                className="btn btn-success"
               >
                 Применить результат
               </button>

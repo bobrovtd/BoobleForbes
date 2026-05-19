@@ -6,8 +6,20 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.api import auth as auth_api
+from app.core import deps, security
 from app.core.db import Base, get_db
 from app.main import create_app
+
+
+@pytest.fixture(autouse=True)
+def test_cookie_settings() -> None:
+    security.settings.cookie_domain = None
+    security.settings.cookie_secure = False
+    deps.settings.cookie_domain = None
+    deps.settings.cookie_secure = False
+    auth_api.settings.cookie_domain = None
+    auth_api.settings.cookie_secure = False
 
 
 @pytest.fixture()

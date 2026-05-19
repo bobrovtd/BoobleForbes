@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 
 export const RegisterPage = (): JSX.Element => {
@@ -30,69 +31,73 @@ export const RegisterPage = (): JSX.Element => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-grain bg-slate-100 px-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="font-display text-2xl font-bold text-ink">Регистрация</h1>
-        <p className="mt-1 text-sm text-slate-600">Создайте аккаунт, чтобы работать с формами.</p>
+    <div className="app-bg flex min-h-screen items-center justify-center px-4 py-8">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
+      <div className="panel w-full max-w-md p-6">
+        <p className="badge mb-3">AI Forms</p>
+        <h1 className="font-display text-2xl font-bold text-[var(--text)]">Регистрация</h1>
+        <p className="mt-1 text-sm muted">Создайте аккаунт, чтобы работать с формами.</p>
 
         <form className="mt-5 space-y-4" onSubmit={onSubmit}>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Имя</span>
+            <span className="label">Имя</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="field"
             />
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Email</span>
+            <span className="label">Email</span>
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="field"
               required
             />
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Пароль</span>
+            <span className="label">Пароль</span>
             <input
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="field"
               minLength={8}
               required
             />
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Роль</span>
+            <span className="label">Роль</span>
             <select
               value={role}
               onChange={(event) => setRole(event.target.value as "creator" | "respondent")}
-              className="w-full rounded-md border border-slate-300 px-3 py-2"
+              className="field"
             >
               <option value="creator">creator</option>
               <option value="respondent">respondent</option>
             </select>
           </label>
 
-          {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+          {error && <p className="notice-danger rounded-lg px-3 py-2 text-sm">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-emerald-600 px-4 py-2 font-medium text-white disabled:opacity-50"
+            className="btn btn-success w-full disabled:opacity-50"
           >
             {loading ? "Регистрация..." : "Создать аккаунт"}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-slate-600">
-          Уже есть аккаунт? <Link className="text-sky-700 underline" to="/login">Войти</Link>
+        <p className="mt-4 text-sm muted">
+          Уже есть аккаунт? <Link className="font-semibold text-[var(--primary)] underline" to="/login">Войти</Link>
         </p>
       </div>
     </div>

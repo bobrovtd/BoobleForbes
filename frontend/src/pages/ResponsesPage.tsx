@@ -56,42 +56,42 @@ export const ResponsesPage = (): JSX.Element => {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold text-slate-900">Ответы и аналитика</h1>
-          <p className="text-sm text-slate-600">Форма #{formId}</p>
+          <h1 className="font-display text-3xl font-bold text-[var(--text)]">Ответы и аналитика</h1>
+          <p className="text-sm muted">Форма #{formId}</p>
         </div>
 
         <div className="flex gap-2">
-          <Link to={`/forms/${formId}/edit`} className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700">
+          <Link to={`/forms/${formId}/edit`} className="btn btn-secondary">
             К форме
           </Link>
           <button
             type="button"
             onClick={onExport}
-            className="rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white"
+            className="btn btn-primary"
           >
             Скачать CSV
           </button>
         </div>
       </div>
 
-      {loading && <p className="text-slate-600">Загрузка...</p>}
-      {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {loading && <p className="muted">Загрузка...</p>}
+      {error && <p className="notice-danger rounded-lg px-3 py-2 text-sm">{error}</p>}
 
       {analytics && (
         <section className="grid gap-4 lg:grid-cols-2">
-          <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">Сводка</h2>
-            <p className="mt-2 text-sm text-slate-700">Всего ответов: {analytics.total_responses}</p>
+          <article className="panel p-4">
+            <h2 className="font-semibold text-[var(--text)]">Сводка</h2>
+            <p className="mt-2 text-sm muted">Всего ответов: {analytics.total_responses}</p>
           </article>
 
-          <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">Числовые вопросы</h2>
+          <article className="panel p-4">
+            <h2 className="font-semibold text-[var(--text)]">Числовые вопросы</h2>
             <div className="mt-2 space-y-3">
               {analytics.scale_questions.map((item) => (
-                <div key={item.question_id} className="rounded-md bg-slate-50 p-3 text-sm">
-                  <p className="font-medium text-slate-800">{item.question_text}</p>
-                  <p className="text-slate-600">Среднее: {item.average ?? "-"}</p>
-                  <p className="text-slate-600">Медиана: {item.median ?? "-"}</p>
+                <div key={item.question_id} className="panel-muted p-3 text-sm">
+                  <p className="font-medium text-[var(--text)]">{item.question_text}</p>
+                  <p className="muted">Среднее: {item.average ?? "-"}</p>
+                  <p className="muted">Медиана: {item.median ?? "-"}</p>
                 </div>
               ))}
             </div>
@@ -101,13 +101,13 @@ export const ResponsesPage = (): JSX.Element => {
 
       {analytics && (
         <section className="grid gap-4 lg:grid-cols-2">
-          <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">Варианты</h2>
+          <article className="panel p-4">
+            <h2 className="font-semibold text-[var(--text)]">Варианты</h2>
             <div className="mt-3 space-y-3">
               {analytics.choice_questions.map((item) => (
-                <div key={item.question_id} className="rounded-md border border-slate-200 p-3">
-                  <p className="font-medium text-slate-800">{item.question_text}</p>
-                  <ul className="mt-2 space-y-1 text-sm text-slate-600">
+                <div key={item.question_id} className="panel-muted p-3">
+                  <p className="font-medium text-[var(--text)]">{item.question_text}</p>
+                  <ul className="mt-2 space-y-1 text-sm muted">
                     {Object.entries(item.counts).map(([option, count]) => (
                       <li key={option} className="flex justify-between">
                         <span>{option}</span>
@@ -120,13 +120,13 @@ export const ResponsesPage = (): JSX.Element => {
             </div>
           </article>
 
-          <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="font-semibold text-slate-900">Текстовые ответы</h2>
+          <article className="panel p-4">
+            <h2 className="font-semibold text-[var(--text)]">Текстовые ответы</h2>
             <div className="mt-3 space-y-3">
               {analytics.text_questions.map((item) => (
-                <div key={item.question_id} className="rounded-md border border-slate-200 p-3">
-                  <p className="font-medium text-slate-800">{item.question_text}</p>
-                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                <div key={item.question_id} className="panel-muted p-3">
+                  <p className="font-medium text-[var(--text)]">{item.question_text}</p>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm muted">
                     {item.responses.slice(0, 10).map((text, index) => (
                       <li key={index}>{text}</li>
                     ))}
@@ -139,11 +139,11 @@ export const ResponsesPage = (): JSX.Element => {
         </section>
       )}
 
-      <section className="overflow-auto rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="mb-3 font-semibold text-slate-900">Таблица ответов</h2>
+      <section className="panel overflow-auto p-4">
+        <h2 className="mb-3 font-semibold text-[var(--text)]">Таблица ответов</h2>
         <table className="min-w-full border-collapse text-sm">
           <thead>
-            <tr className="border-b border-slate-200 text-left text-slate-600">
+            <tr className="border-b border-[var(--border)] text-left muted">
               <th className="px-2 py-2">ID</th>
               <th className="px-2 py-2">Пользователь</th>
               <th className="px-2 py-2">Дата</th>
@@ -154,7 +154,7 @@ export const ResponsesPage = (): JSX.Element => {
           </thead>
           <tbody>
             {responses.map((row) => (
-              <tr key={row.response_id} className="border-b border-slate-100 align-top">
+              <tr key={row.response_id} className="border-b border-[var(--border)] align-top">
                 <td className="px-2 py-2">{row.response_id}</td>
                 <td className="px-2 py-2">{row.respondent_id ?? "аноним"}</td>
                 <td className="px-2 py-2">{new Date(row.submitted_at).toLocaleString()}</td>
@@ -167,7 +167,7 @@ export const ResponsesPage = (): JSX.Element => {
             ))}
           </tbody>
         </table>
-        {responses.length === 0 && <p className="mt-2 text-sm text-slate-500">Пока нет ответов.</p>}
+        {responses.length === 0 && <p className="mt-2 text-sm soft">Пока нет ответов.</p>}
       </section>
     </div>
   );

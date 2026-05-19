@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { formsService } from "@/services/forms";
 import { PublicForm, Question } from "@/types/forms";
 
@@ -70,54 +71,69 @@ export const PublicFormPage = (): JSX.Element => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-600">Загрузка формы...</div>;
+    return <div className="app-bg min-h-screen p-8 text-center muted">Загрузка формы...</div>;
   }
 
   if (submitted) {
     return (
-      <div className="mx-auto mt-20 max-w-xl rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-        <h1 className="font-display text-2xl font-bold text-emerald-800">Спасибо!</h1>
-        <p className="mt-2 text-sm text-emerald-700">Ваш ответ успешно отправлен.</p>
+      <div className="app-bg min-h-screen px-4 py-20">
+        <div className="absolute right-4 top-4">
+          <ThemeToggle />
+        </div>
+        <div className="mx-auto max-w-xl rounded-2xl border p-6 text-center notice-success">
+          <h1 className="font-display text-2xl font-bold">Спасибо!</h1>
+          <p className="mt-2 text-sm">Ваш ответ успешно отправлен.</p>
+        </div>
       </div>
     );
   }
 
   if (!form) {
-    return <div className="p-8 text-center text-rose-700">{error ?? "Форма недоступна"}</div>;
+    return (
+      <div className="app-bg min-h-screen p-8 text-center text-[var(--danger)]">
+        <div className="absolute right-4 top-4">
+          <ThemeToggle />
+        </div>
+        {error ?? "Форма недоступна"}
+      </div>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h1 className="font-display text-3xl font-bold text-slate-900">{form.title}</h1>
-        {form.description && <p className="mt-2 text-slate-600">{form.description}</p>}
+    <div className="app-bg min-h-screen px-4 py-8">
+      <div className="mx-auto mb-4 flex max-w-3xl justify-end">
+        <ThemeToggle />
+      </div>
+      <div className="panel mx-auto mb-5 max-w-3xl p-5">
+        <h1 className="font-display text-3xl font-bold text-[var(--text)]">{form.title}</h1>
+        {form.description && <p className="mt-2 muted">{form.description}</p>}
         {form.access_mode === "authenticated" && (
-          <p className="mt-2 text-sm text-sky-700">
-            Для отправки требуется вход. <Link to="/login" className="underline">Войти</Link>
+          <p className="mt-2 text-sm text-[var(--primary)]">
+            Для отправки требуется вход. <Link to="/login" className="font-semibold underline">Войти</Link>
           </p>
         )}
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-4">
         {orderedQuestions.map((question, index) => {
           const value = answers[question.id!];
           const withTime = Boolean(question.config.with_time);
           const isMultiline = Boolean(question.config.multiline);
 
           return (
-            <section key={question.id ?? index} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <h2 className="font-semibold text-slate-900">
+            <section key={question.id ?? index} className="panel p-4">
+              <h2 className="font-semibold text-[var(--text)]">
                 {index + 1}. {question.text}
                 {question.is_required && <span className="text-rose-600"> *</span>}
               </h2>
-              {question.description && <p className="mt-1 text-sm text-slate-500">{question.description}</p>}
+              {question.description && <p className="mt-1 text-sm soft">{question.description}</p>}
 
               <div className="mt-3">
                 {question.type === "text" && !isMultiline && (
                   <input
                     value={(value as string) ?? ""}
                     onChange={(event) => updateAnswer(question, event.target.value)}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2"
+                    className="field"
                     required={question.is_required}
                   />
                 )}
@@ -127,7 +143,7 @@ export const PublicFormPage = (): JSX.Element => {
                     value={(value as string) ?? ""}
                     onChange={(event) => updateAnswer(question, event.target.value)}
                     rows={4}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2"
+                    className="field"
                     required={question.is_required}
                   />
                 )}
@@ -135,7 +151,7 @@ export const PublicFormPage = (): JSX.Element => {
                 {question.type === "single_choice" && (
                   <div className="space-y-2">
                     {question.options.map((option) => (
-                      <label key={option.id} className="flex items-center gap-2 text-sm text-slate-700">
+                      <label key={option.id} className="flex items-center gap-2 text-sm muted">
                         <input
                           type="radio"
                           name={`q-${question.id}`}
@@ -156,7 +172,7 @@ export const PublicFormPage = (): JSX.Element => {
                       const checked = current.includes(option.id ?? -1);
 
                       return (
-                        <label key={option.id} className="flex items-center gap-2 text-sm text-slate-700">
+                        <label key={option.id} className="flex items-center gap-2 text-sm muted">
                           <input
                             type="checkbox"
                             checked={checked}
@@ -182,7 +198,7 @@ export const PublicFormPage = (): JSX.Element => {
                     max={Number(question.config.max_value ?? 10)}
                     step={Number(question.config.step ?? 1)}
                     onChange={(event) => updateAnswer(question, Number(event.target.value))}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2"
+                    className="field"
                     required={question.is_required}
                   />
                 )}
@@ -192,7 +208,7 @@ export const PublicFormPage = (): JSX.Element => {
                     type={withTime ? "datetime-local" : "date"}
                     value={(value as string) ?? ""}
                     onChange={(event) => updateAnswer(question, event.target.value)}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2"
+                    className="field"
                     required={question.is_required}
                   />
                 )}
@@ -201,9 +217,9 @@ export const PublicFormPage = (): JSX.Element => {
           );
         })}
 
-        {error && <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+        {error && <p className="notice-danger rounded-lg px-3 py-2 text-sm">{error}</p>}
 
-        <button type="submit" className="w-full rounded-md bg-sky-600 px-4 py-2 font-medium text-white">
+        <button type="submit" className="btn btn-primary w-full">
           Отправить
         </button>
       </form>

@@ -71,13 +71,15 @@ class ResponseService:
     def list_responses(self, *, form_id: int, owner_id: int) -> list[ResponseListRow]:
         form = self._get_owned_form(form_id, owner_id)
         items = self.responses.list_by_form(form.id)
+        question_map = {question.id: question for question in form.questions}
 
         rows: list[ResponseListRow] = []
         for item in items:
             answers: dict[str, Any] = {}
             for answer in item.answers:
-                question_text = answer.question.text if answer.question else str(answer.question_id)
-                answers[question_text] = self._deserialize_answer(answer.value)
+                question = question_map.get(answer.question_id)
+                question_text = question.text if question else str(answer.question_id)
+                answers[question_text] = self._format_answer_for_display(question, answer.value)
             rows.append(
                 ResponseListRow(
                     response_id=item.id,
@@ -98,13 +100,14 @@ class ResponseService:
         writer.writerow(["response_id", "respondent_id", "submitted_at", *columns])
 
         question_lookup = {question.id: question.text for question in form.questions}
+        question_map = {question.id: question for question in form.questions}
         for response in responses:
             row_values: dict[str, str] = {question_text: "" for question_text in columns}
             for answer in response.answers:
                 key = question_lookup.get(answer.question_id)
                 if not key:
                     continue
-                deserialized = self._deserialize_answer(answer.value)
+                deserialized = self._format_answer_for_display(question_map.get(answer.question_id), answer.value)
                 if isinstance(deserialized, list):
                     row_values[key] = "; ".join(str(item) for item in deserialized)
                 elif isinstance(deserialized, dict):
@@ -304,3 +307,17 @@ class ResponseService:
         if isinstance(value, int):
             return option_text_by_id.get(value, str(value))
         return str(value)
+
+    def _format_answer_for_display(self, question: Question | None, value: str | None) -> Any:
+        parsed = self._deserialize_answer(value)
+        if not question:
+            return parsed
+
+        option_text_by_id = {option.id: option.text for option in question.options}
+        if question.type == QuestionType.single_choice:
+            return self._normalize_choice_value(parsed, option_text_by_id)
+
+        if question.type == QuestionType.multiple_choice and isinstance(parsed, list):
+            return [self._normalize_choice_value(item, option_text_by_id) for item in parsed]
+
+        return parsed

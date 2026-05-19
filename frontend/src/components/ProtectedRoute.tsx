@@ -6,7 +6,7 @@ export const ProtectedRoute = (): JSX.Element => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="p-10 text-center text-slate-600">Загрузка...</div>;
+    return <div className="app-bg min-h-screen p-10 text-center muted">Загрузка...</div>;
   }
 
   if (!user) {

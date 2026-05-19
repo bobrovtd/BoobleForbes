@@ -222,6 +222,18 @@ def test_form_e2e_flow(client: TestClient) -> None:
                 "config": {"min_value": 1, "max_value": 5, "step": 1},
                 "options": [],
             },
+            {
+                "type": "single_choice",
+                "text": "Tea quality",
+                "description": "",
+                "order_index": 2,
+                "is_required": True,
+                "config": {},
+                "options": [
+                    {"text": "Good", "order_index": 0},
+                    {"text": "Bad", "order_index": 1},
+                ],
+            },
         ],
     }
 
@@ -241,6 +253,9 @@ def test_form_e2e_flow(client: TestClient) -> None:
 
     text_question_id = public_form["questions"][0]["id"]
     scale_question_id = public_form["questions"][1]["id"]
+    choice_question = public_form["questions"][2]
+    choice_question_id = choice_question["id"]
+    choice_option_id = choice_question["options"][0]["id"]
 
     submit_response = client.post(
         f"/api/v1/forms/{form_id}/submit",
@@ -248,6 +263,7 @@ def test_form_e2e_flow(client: TestClient) -> None:
             "answers": [
                 {"question_id": text_question_id, "value": "Александр"},
                 {"question_id": scale_question_id, "value": 4},
+                {"question_id": choice_question_id, "value": choice_option_id},
             ]
         },
     )
@@ -255,12 +271,17 @@ def test_form_e2e_flow(client: TestClient) -> None:
 
     responses_response = client.get(f"/api/v1/forms/{form_id}/responses")
     assert responses_response.status_code == 200
-    assert len(responses_response.json()) == 1
+    responses = responses_response.json()
+    assert len(responses) == 1
+    assert responses[0]["answers"]["Tea quality"] == "Good"
 
     analytics_response = client.get(f"/api/v1/forms/{form_id}/analytics")
     assert analytics_response.status_code == 200
-    assert analytics_response.json()["total_responses"] == 1
+    analytics = analytics_response.json()
+    assert analytics["total_responses"] == 1
+    assert analytics["choice_questions"][0]["counts"] == {"Good": 1}
 
     export_response = client.get(f"/api/v1/forms/{form_id}/responses/export")
     assert export_response.status_code == 200
     assert export_response.headers["content-type"].startswith("text/csv")
+    assert "Good" in export_response.text

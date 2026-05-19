@@ -7,6 +7,7 @@ Create Date: 2026-03-23 11:30:00.000000
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 # revision identifiers, used by Alembic.
@@ -15,9 +16,17 @@ down_revision = None
 branch_labels = None
 depends_on = None
 
-user_role_enum = sa.Enum("admin", "creator", "respondent", name="userrole")
-access_mode_enum = sa.Enum("public", "unlisted", "authenticated", name="accessmode")
-question_type_enum = sa.Enum("text", "single_choice", "multiple_choice", "scale", "date", name="questiontype")
+user_role_enum = postgresql.ENUM("admin", "creator", "respondent", name="userrole", create_type=False)
+access_mode_enum = postgresql.ENUM("public", "unlisted", "authenticated", name="accessmode", create_type=False)
+question_type_enum = postgresql.ENUM(
+    "text",
+    "single_choice",
+    "multiple_choice",
+    "scale",
+    "date",
+    name="questiontype",
+    create_type=False,
+)
 
 
 def upgrade() -> None:
